@@ -1,0 +1,240 @@
+"0=NUEVO 1=SEGUIR"?→A
+If A=0:Then
+{0,0,0,0,0,0,0}→List 1
+{0,0,0,0,0,0,0}→List 2
+{0,0,0,0,0,0,0}→List 3
+{0,0,0,0,0,0,0}→List 4
+{0,0,0,0,0,0,0}→List 5
+{0,0,0}→List 6
+{0,0,0}→List 7
+{0,0,0}→List 8
+{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}→List 9
+{0,0,50,100,1,0,0,0,0,0}→List 10
+IfEnd
+While 1=1
+1→R:1→Y
+ClrText
+Locate 3,1,"ARMONICOS¹"
+Locate 3,2,"RAMAS R L C²"
+Locate 3,3,"SIN COMPENSAR³"
+Locate 3,4,"COMPENSAR C⁴"
+Locate 3,5,"POR ARMONICO⁵"
+Locate 3,6,"BORRAR TODO⁶"
+Locate 3,7,"SALIR⁰"
+While Y=1
+Locate 1,1," ":Locate 1,2," ":Locate 1,3," ":Locate 1,4," ":Locate 1,5," ":Locate 1,6," ":Locate 1,7," "
+Locate 1,R+0,">"
+While Getkey>0:WhileEnd
+0→W
+While W=0
+Getkey→W
+WhileEnd
+If W=28:Then R–1→R:IfEnd
+If W=37:Then R+1→R:IfEnd
+If R<1:Then 7→R:IfEnd
+If R>7:Then 1→R:IfEnd
+If W=31:Then 0→Y:IfEnd
+If W=72:Then 1→R:0→Y:IfEnd
+If W=62:Then 2→R:0→Y:IfEnd
+If W=52:Then 3→R:0→Y:IfEnd
+If W=73:Then 4→R:0→Y:IfEnd
+If W=63:Then 5→R:0→Y:IfEnd
+If W=53:Then 6→R:0→Y:IfEnd
+If W=71:Then 7→R:0→Y:IfEnd
+If W=47:Then 7→R:0→Y:IfEnd
+WhileEnd
+R→O
+If R=7:Then 0→O:IfEnd
+If O=0:Then Stop:IfEnd
+If O=1:Then
+ClrText
+"1=PICO 2=EFICAZ"?→T
+1→F
+If T=1:Then 0.707106781186548→F:IfEnd
+F→List 10[5]
+"F HZ (0=50)"?→A
+If A=0:Then 50→A:IfEnd
+A→List 10[3]
+"N ARMONICOS (1 A 7)"?→N
+If N<1:Then 1→N:IfEnd
+If N>7:Then 7→N:IfEnd
+N→List 10[1]
+List 10[5]→G
+For 1→K To N
+ClrText
+Locate 1,1,"ARMONICO":Locate 10,1,K:Locate 12,1,"DE":Locate 15,1,N
+"ORDEN H"?→H
+H→List 1[K]
+"U V (0 SI NO HAY)"?→A
+0→B
+If Abs (A)>0:Then
+"FASE U GRADOS"?→B
+IfEnd
+B×3.14159265358979÷180→E
+E–6.28318530717959×Intg (E÷6.28318530717959+0.5)→E
+E×E→F
+1–F÷2×(1–F÷12×(1–F÷30×(1–F÷56×(1–F÷90×(1–F÷132×(1–F÷182×(1–F÷240×(1–F÷306×(1–F÷380×(1–F÷462))))))))))→C
+E×(1–F÷6×(1–F÷20×(1–F÷42×(1–F÷72×(1–F÷110×(1–F÷156×(1–F÷210×(1–F÷272×(1–F÷342×(1–F÷420))))))))))→D
+A×G×C→List 2[K]:A×G×D→List 3[K]
+"I A (0 SI NO HAY)"?→A
+0→B
+If Abs (A)>0:Then
+"FASE I GRADOS"?→B
+IfEnd
+B×3.14159265358979÷180→E
+E–6.28318530717959×Intg (E÷6.28318530717959+0.5)→E
+E×E→F
+1–F÷2×(1–F÷12×(1–F÷30×(1–F÷56×(1–F÷90×(1–F÷132×(1–F÷182×(1–F÷240×(1–F÷306×(1–F÷380×(1–F÷462))))))))))→C
+E×(1–F÷6×(1–F÷20×(1–F÷42×(1–F÷72×(1–F÷110×(1–F÷156×(1–F÷210×(1–F÷272×(1–F÷342×(1–F÷420))))))))))→D
+A×G×C→List 4[K]:A×G×D→List 5[K]
+Next
+IfEnd
+If O=2:Then
+ClrText
+"N RAMAS (0 A 3)"?→N
+If N<0:Then 0→N:IfEnd
+If N>3:Then 3→N:IfEnd
+N→List 10[2]
+If N>0:Then
+For 1→K To N
+ClrText
+Locate 1,1,"RAMA":Locate 6,1,K:Locate 8,1,"DE":Locate 11,1,N
+"R OHM"?→A
+A→List 6[K]
+"XL OHM (A F FUND)"?→A
+A→List 7[K]
+"XC OHM (A F FUND)"?→A
+A→List 8[K]
+Next
+IfEnd
+IfEnd
+If O=6:Then
+1→S:1→T
+ClrText
+Locate 1,1,"BORRAR TODO?"
+Locate 3,2,"NO¹"
+Locate 3,3,"SI, BORRAR²"
+While T=1
+Locate 1,2," ":Locate 1,3," "
+Locate 1,S+1,">"
+While Getkey>0:WhileEnd
+0→M
+While M=0
+Getkey→M
+WhileEnd
+If M=28:Then S–1→S:IfEnd
+If M=37:Then S+1→S:IfEnd
+If S<1:Then 2→S:IfEnd
+If S>2:Then 1→S:IfEnd
+If M=31:Then 0→T:IfEnd
+If M=72:Then 1→S:0→T:IfEnd
+If M=62:Then 2→S:0→T:IfEnd
+If M=71:Then 1→S:0→T:IfEnd
+If M=47:Then 1→S:0→T:IfEnd
+WhileEnd
+S→X
+If X=2:Then
+{0,0,0,0,0,0,0}→List 1
+{0,0,0,0,0,0,0}→List 2
+{0,0,0,0,0,0,0}→List 3
+{0,0,0,0,0,0,0}→List 4
+{0,0,0,0,0,0,0}→List 5
+{0,0,0}→List 6
+{0,0,0}→List 7
+{0,0,0}→List 8
+{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}→List 9
+{0,0,50,100,1,0,0,0,0,0}→List 10
+IfEnd
+IfEnd
+If O>2:Then
+If O<6:Then
+List 10[1]→N
+1→I
+0→V
+If O=4:Then
+"% A COMPENSAR (0=100)"?→X
+If X=0:Then 100→X:IfEnd
+X→List 10[4]
+2→I
+IfEnd
+For 1→Z To I
+If Z=2:Then
+List 10[4]×G÷100→U
+0→V
+If U>0:Then
+E÷U→V
+U÷(6.28318530717959×List 10[3]×E)×1000000→List 9[20]
+IfEnd
+IfEnd
+0→P:0→Q:0→M:0→L:0→E:0→F:0→G
+For 1→K To N
+List 1[K]→H
+List 2[K]→A:List 3[K]→B
+List 4[K]→C:List 5[K]→D
+If List 10[2]>0:Then
+For 1→J To List 10[2]
+List 6[J]→S
+H×List 7[J]–List 8[J]÷H→T
+S×S+T×T→U
+If U>0:Then
+C+(A×S+B×T)÷U→C
+D+(B×S–A×T)÷U→D
+IfEnd
+Next
+IfEnd
+If V>0:Then
+C–H×B÷V→C
+D+H×A÷V→D
+IfEnd
+P+A×C+B×D→P
+Q+B×C–A×D→Q
+M+A×A+B×B→M
+L+C×C+D×D→L
+√(C×C+D×D)→List 9[K]
+If H=1:Then
+A×A+B×B→E:C×C+D×D→F:B×C–A×D→G
+IfEnd
+Next
+√(M×L)→T
+M×L–P×P–Q×Q→U
+If U<0:Then 0→U:IfEnd
+√(U)→U
+0→X:0→J
+If F>0:Then √(Abs (L–F)÷F)×100→X:IfEnd
+If E>0:Then √(Abs (M–E)÷E)×100→J:IfEnd
+Next
+If O=5:Then
+ClrText
+For 1→K To N
+Locate 1,K,List 1[K]:Locate 5,K,List 9[K]
+Next
+While Getkey>0:WhileEnd
+While Getkey=0:WhileEnd
+IfEnd
+If O<5:Then
+ClrText
+Locate 1,1,"I EF A":Locate 11,1,√(L)
+Locate 1,2,"P W":Locate 11,2,P
+Locate 1,3,"Q VAR":Locate 11,3,Q
+Locate 1,4,"S VA":Locate 11,4,T
+Locate 1,5,"D VAR":Locate 11,5,U
+0→W
+If T>0:Then P÷T→W:IfEnd
+Locate 1,6,"FP":Locate 11,6,W
+Locate 1,7,"THD I %":Locate 11,7,X
+While Getkey>0:WhileEnd
+While Getkey=0:WhileEnd
+ClrText
+Locate 1,1,"U EF V":Locate 11,1,√(M)
+Locate 1,2,"I FUND A":Locate 11,2,√(F)
+Locate 1,3,"THD U %":Locate 11,3,J
+If O=4:Then
+Locate 1,4,"C UF":Locate 11,4,List 9[20]
+Locate 1,5,"XC OHM":Locate 11,5,V
+IfEnd
+While Getkey>0:WhileEnd
+While Getkey=0:WhileEnd
+IfEnd
+IfEnd
+IfEnd
+WhileEnd
