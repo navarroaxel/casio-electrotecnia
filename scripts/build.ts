@@ -2,8 +2,9 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { buildG1m } from "../src/lib/casioG1m";
 import { POLIARM_LINES, POLIARM_NAME } from "../src/lib/poliarm";
+import { TRIFAS_LINES, TRIFAS_NAME } from "../src/lib/trifas";
 
-const PROGRAMS: [string, string[]][] = [[POLIARM_NAME, POLIARM_LINES]];
+const PROGRAMS: [string, string[]][] = [[POLIARM_NAME, POLIARM_LINES], [TRIFAS_NAME, TRIFAS_LINES]];
 
 mkdirSync("g1m", { recursive: true });
 mkdirSync("listings", { recursive: true });
