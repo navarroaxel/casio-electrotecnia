@@ -1,4 +1,4 @@
-// Casio fx-9860GIII program TRIFAS: three-phase systems. A symmetrical source (direct ABC or inverse ACB sequence, given by
+// Casio fx-9860GIII program TRIFAS: three-phase systems (phases R S T). A symmetrical source (direct RST or inverse RTS sequence, given by
 // any one of its phase or line voltages) feeding a star load with neutral (4 wires), a star load without neutral (3 wires,
 // with the displacement of the neutral) or a delta load, balanced or not. It gives the line currents, the neutral current
 // (4 wires) or the neutral displacement (3 wires) or the phase currents (delta), P, Q and S, and, for the balanced load
@@ -33,8 +33,8 @@ const valueRow = (row: number, label: string, v: string): string[] => [
   `Locate 7,${row},Intg (${v}×100+0.5)÷100`,
 ];
 
-// Data: List 1 / 2 = Re / Im of the phase voltages U_AN, U_BN, U_CN of the source (rms); 3 / 4 = Re / Im of the impedances of
-// the three load elements (phases A B C, or AB BC CA in delta); 5 / 6 = line currents; 7 / 8 = voltage on each element;
+// Data: List 1 / 2 = Re / Im of the phase voltages U_RN, U_SN, U_TN of the source (rms); 3 / 4 = Re / Im of the impedances of
+// the three load elements (phases R S T, or RS ST TR in delta); 5 / 6 = line currents; 7 / 8 = voltage on each element;
 // List 9 = {P, Q, S, Re / Im of I_N (4 wires) or of the displacement U_N'N (3 wires), …, element currents at 10-15};
 // List 10 = {connection 1 = star 4 wires, 2 = star 3 wires, 3 = delta}. They persist: 0 = new, 1 = go on.
 export const TRIFAS_LINES = [
@@ -63,11 +63,11 @@ export const TRIFAS_LINES = [
   // 1: the source: sequence and one voltage as reference
   "If O=1:Then",
   "ClrText",
-  '"1=ABC 2=ACB"?→T',
+  '"1=RST 2=RTS"?→T',
   "ClrText",
   'Locate 1,1,"REFERENCIA:"',
-  'Locate 1,2,"1 UAN 2 UBN 3 UCN"',
-  'Locate 1,3,"4 UAB 5 UBC 6 UCA"',
+  'Locate 1,2,"1 URN 2 USN 3 UTN"',
+  'Locate 1,3,"4 URS 5 UST 6 UTR"',
   '"NRO"?→R',
   '"VALOR EFICAZ V"?→A',
   '"ANGULO GRADOS"?→B',
@@ -104,14 +104,14 @@ export const TRIFAS_LINES = [
   "For 1→K To 3",
   "ClrText",
   "If T<3:Then",
-  'If K=1:Then Locate 1,1,"Z DE LA FASE A":IfEnd',
-  'If K=2:Then Locate 1,1,"Z DE LA FASE B":IfEnd',
-  'If K=3:Then Locate 1,1,"Z DE LA FASE C":IfEnd',
+  'If K=1:Then Locate 1,1,"Z DE LA FASE R":IfEnd',
+  'If K=2:Then Locate 1,1,"Z DE LA FASE S":IfEnd',
+  'If K=3:Then Locate 1,1,"Z DE LA FASE T":IfEnd',
   "IfEnd",
   "If T=3:Then",
-  'If K=1:Then Locate 1,1,"Z ENTRE A Y B":IfEnd',
-  'If K=2:Then Locate 1,1,"Z ENTRE B Y C":IfEnd',
-  'If K=3:Then Locate 1,1,"Z ENTRE C Y A":IfEnd',
+  'If K=1:Then Locate 1,1,"Z ENTRE R Y S":IfEnd',
+  'If K=2:Then Locate 1,1,"Z ENTRE S Y T":IfEnd',
+  'If K=3:Then Locate 1,1,"Z ENTRE T Y R":IfEnd',
   "IfEnd",
   '"MODULO OHM"?→A',
   '"ANGULO GRADOS"?→B',
@@ -186,9 +186,9 @@ export const TRIFAS_LINES = [
   "P→List 9[1]:Q→List 9[2]:√(P×P+Q×Q)→List 9[3]",
   // page 1: line currents, neutral current or displacement, P, Q, S
   "ClrText",
-  ...phasorRow(1, "IA", "List 5[1]", "List 6[1]"),
-  ...phasorRow(2, "IB", "List 5[2]", "List 6[2]"),
-  ...phasorRow(3, "IC", "List 5[3]", "List 6[3]"),
+  ...phasorRow(1, "IR", "List 5[1]", "List 6[1]"),
+  ...phasorRow(2, "IS", "List 5[2]", "List 6[2]"),
+  ...phasorRow(3, "IT", "List 5[3]", "List 6[3]"),
   "If T=1:Then",
   ...phasorRow(4, "IN", "List 9[4]", "List 9[5]"),
   "IfEnd",
@@ -203,14 +203,14 @@ export const TRIFAS_LINES = [
   "If T>1:Then",
   "ClrText",
   "If T=2:Then",
-  ...phasorRow(1, "UA", "List 7[1]", "List 8[1]"),
-  ...phasorRow(2, "UB", "List 7[2]", "List 8[2]"),
-  ...phasorRow(3, "UC", "List 7[3]", "List 8[3]"),
+  ...phasorRow(1, "UR", "List 7[1]", "List 8[1]"),
+  ...phasorRow(2, "US", "List 7[2]", "List 8[2]"),
+  ...phasorRow(3, "UT", "List 7[3]", "List 8[3]"),
   "IfEnd",
   "If T=3:Then",
-  ...phasorRow(1, "IAB", "List 9[10]", "List 9[11]"),
-  ...phasorRow(2, "IBC", "List 9[12]", "List 9[13]"),
-  ...phasorRow(3, "ICA", "List 9[14]", "List 9[15]"),
+  ...phasorRow(1, "IRS", "List 9[10]", "List 9[11]"),
+  ...phasorRow(2, "IST", "List 9[12]", "List 9[13]"),
+  ...phasorRow(3, "ITR", "List 9[14]", "List 9[15]"),
   "IfEnd",
   ...PAUSE,
   "IfEnd",
@@ -277,32 +277,32 @@ const polar = (amp: number, deg: number): Cx => [amp * Math.cos((deg * Math.PI) 
 export const mag = (a: Cx) => Math.hypot(a[0], a[1]);
 export const angle = (a: Cx) => (mag(a) > 0 ? (Math.atan2(a[1], a[0]) * 180) / Math.PI : 0);
 
-export type Reference = "AN" | "BN" | "CN" | "AB" | "BC" | "CA";
+export type Reference = "RN" | "SN" | "TN" | "RS" | "ST" | "TR";
 export interface ThreePhaseInput {
-  sequence: "ABC" | "ACB";
+  sequence: "RST" | "RTS";
   ref: Reference;
   value: number; // rms of the reference voltage
   angle: number; // degrees
   connection: "Y4" | "Y3" | "D";
-  Z: [[number, number], [number, number], [number, number]]; // [modulus, degrees] of A B C (or AB BC CA)
+  Z: [[number, number], [number, number], [number, number]]; // [modulus, degrees] of R S T (or RS ST TR)
 }
 export interface ThreePhaseResult {
   U: Cx[]; // phase voltages of the source
   V: Cx[]; // voltage on each load element
   Ielem: Cx[]; // current of each load element
   I: Cx[]; // line currents
-  IN?: Cx; // I_A + I_B + I_C (4 wires)
+  IN?: Cx; // I_R + I_S + I_T (4 wires)
   UNN?: Cx; // displacement of the load's neutral (3 wires)
   P: number;
   Q: number;
   S: number;
 }
 
-const OFF: Record<Reference, number> = { AN: 0, BN: -120, CN: 120, AB: 30, BC: -90, CA: 150 };
+const OFF: Record<Reference, number> = { RN: 0, SN: -120, TN: 120, RS: 30, ST: -90, TR: 150 };
 
 export function solveThreePhase(inp: ThreePhaseInput): ThreePhaseResult {
-  const s = inp.sequence === "ABC" ? 1 : -1;
-  const line = inp.ref === "AB" || inp.ref === "BC" || inp.ref === "CA";
+  const s = inp.sequence === "RST" ? 1 : -1;
+  const line = inp.ref === "RS" || inp.ref === "ST" || inp.ref === "TR";
   const Uf = line ? inp.value / Math.sqrt(3) : inp.value;
   const thA = inp.angle - s * OFF[inp.ref];
   const U: Cx[] = [polar(Uf, thA), polar(Uf, thA - 120 * s), polar(Uf, thA + 120 * s)];

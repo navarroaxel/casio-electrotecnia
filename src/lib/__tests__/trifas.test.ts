@@ -3,21 +3,21 @@ import { buildG1m, programBytes } from "../casioG1m";
 import { TRIFAS_LINES, aron, angle, mag, oneWattmeter, solveThreePhase, type ThreePhaseInput } from "../trifas";
 
 const EX1: ThreePhaseInput = {
-  sequence: "ABC", ref: "BC", value: 294.2, angle: 0, connection: "Y4",
-  Z: [[10, 0], [15, 30], [10, -30]], // Z_A, Z_B, Z_C of the exercise
+  sequence: "RST", ref: "ST", value: 294.2, angle: 0, connection: "Y4",
+  Z: [[10, 0], [15, 30], [10, -30]], // Z_R, Z_S, Z_T of the exercise
 };
 const at = (c: [number, number]) => `${mag(c).toFixed(3)} ∠${angle(c).toFixed(1)}°`;
 
-describe("solveThreePhase: exercise 1 (4 wires, U_BC = 294,2 ∠0° V, ABC, unbalanced star)", () => {
+describe("solveThreePhase: exercise 1 (4 wires, U_ST = 294,2 ∠0° V, RST, unbalanced star)", () => {
   const r = solveThreePhase(EX1);
-  test("phase voltages follow from U_BC (U_AN = 169,9 ∠90°) and give U_BC back", () => {
+  test("phase voltages follow from U_ST (U_RN = 169,9 ∠90°) and give U_ST back", () => {
     expect(at(r.U[0])).toBe("169.856 ∠90.0°");
     expect(at(r.U[1])).toBe("169.856 ∠-30.0°");
-    const ubc: [number, number] = [r.U[1][0] - r.U[2][0], r.U[1][1] - r.U[2][1]];
-    expect(mag(ubc)).toBeCloseTo(294.2, 9);
-    expect(angle(ubc)).toBeCloseTo(0, 9);
+    const ust: [number, number] = [r.U[1][0] - r.U[2][0], r.U[1][1] - r.U[2][1]];
+    expect(mag(ust)).toBeCloseTo(294.2, 9);
+    expect(angle(ust)).toBeCloseTo(0, 9);
   });
-  test("line currents and the neutral current (I_N = I_A + I_B + I_C)", () => {
+  test("line currents and the neutral current (I_N = I_R + I_S + I_T)", () => {
     expect(at(r.I[0])).toBe("16.986 ∠90.0°");
     expect(at(r.I[1])).toBe("11.324 ∠-60.0°");
     expect(at(r.I[2])).toBe("16.986 ∠-120.0°");
@@ -30,11 +30,11 @@ describe("solveThreePhase: exercise 1 (4 wires, U_BC = 294,2 ∠0° V, ABC, unba
     expect(r.Q).toBeCloseTo(Q, 6);
     r.I.forEach((i, k) => expect(mag(i) * EX1.Z[k][0]).toBeCloseTo(mag(r.U[k]), 9));
   });
-  test("inverse sequence ACB swaps the phases B and C", () => {
-    const inv = solveThreePhase({ ...EX1, sequence: "ACB", ref: "AN", value: 220, angle: 0 });
+  test("inverse sequence RTS swaps the phases S and T", () => {
+    const inv = solveThreePhase({ ...EX1, sequence: "RTS", ref: "RN", value: 220, angle: 0 });
     expect(angle(inv.U[1])).toBeCloseTo(120, 9);
     expect(angle(inv.U[2])).toBeCloseTo(-120, 9);
-    const dir = solveThreePhase({ ...EX1, sequence: "ABC", ref: "AN", value: 220, angle: 0 });
+    const dir = solveThreePhase({ ...EX1, sequence: "RST", ref: "RN", value: 220, angle: 0 });
     expect(angle(dir.U[1])).toBeCloseTo(-120, 9);
   });
 });
@@ -91,10 +91,10 @@ describe("TRIFAS listing run by the interpreter", () => {
   const within = (v: unknown, ref: number, tol = 0.0051) => expect(Math.abs((v as number) - ref)).toBeLessThanOrEqual(tol);
   const run = (conn: 1 | 2 | 3, input: ThreePhaseInput) => {
     const gfx = newGfx();
-    const refN = { AN: 1, BN: 2, CN: 3, AB: 4, BC: 5, CA: 6 }[input.ref];
+    const refN = { RN: 1, SN: 2, TN: 3, RS: 4, ST: 5, TR: 6 }[input.ref];
     runBasic(
       TRIFAS_LINES,
-      [0, input.sequence === "ABC" ? 1 : 2, refN, input.value, input.angle, conn, ...input.Z.flat()],
+      [0, input.sequence === "RST" ? 1 : 2, refN, input.value, input.angle, conn, ...input.Z.flat()],
       gfx, newMem(), [K.TENS, K.CARGA, K.SOLVE, K.EXIT],
     );
     return gfx;
@@ -103,7 +103,7 @@ describe("TRIFAS listing run by the interpreter", () => {
   test("exercise 1 (4 wires): IA, IB, IC, IN, P, Q, S as the model", () => {
     const gfx = run(1, EX1);
     const m = solveThreePhase(EX1);
-    for (const [label, c] of [["IA", m.I[0]], ["IB", m.I[1]], ["IC", m.I[2]], ["IN", m.IN!]] as const) {
+    for (const [label, c] of [["IR", m.I[0]], ["IS", m.I[1]], ["IT", m.I[2]], ["IN", m.IN!]] as const) {
       const r = rows(gfx, label)!;
       within(r[1], mag(c));
       within(r[2], angle(c));
@@ -118,24 +118,24 @@ describe("TRIFAS listing run by the interpreter", () => {
     const m = solveThreePhase(inp);
     within(rows(gfx, "UNN")![1], mag(m.UNN!));
     within(rows(gfx, "UNN")![2], angle(m.UNN!));
-    ["UA", "UB", "UC"].forEach((l, k) => { within(rows(gfx, l)![1], mag(m.V[k])); within(rows(gfx, l)![2], angle(m.V[k])); });
-    within(rows(gfx, "IA")![1], mag(m.I[0]));
+    ["UR", "US", "UT"].forEach((l, k) => { within(rows(gfx, l)![1], mag(m.V[k])); within(rows(gfx, l)![2], angle(m.V[k])); });
+    within(rows(gfx, "IR")![1], mag(m.I[0]));
   });
   test("delta: line and phase currents (with an inverse sequence and a phase reference)", () => {
-    const inp: ThreePhaseInput = { sequence: "ACB", ref: "CN", value: 127, angle: 15, connection: "D", Z: [[20, 40], [30, -10], [25, 0]] };
+    const inp: ThreePhaseInput = { sequence: "RTS", ref: "TN", value: 127, angle: 15, connection: "D", Z: [[20, 40], [30, -10], [25, 0]] };
     const gfx = run(3, inp);
     const m = solveThreePhase(inp);
-    ["IA", "IB", "IC"].forEach((l, k) => { within(rows(gfx, l)![1], mag(m.I[k])); within(rows(gfx, l)![2], angle(m.I[k])); });
-    ["IAB", "IBC", "ICA"].forEach((l, k) => { within(rows(gfx, l)![1], mag(m.Ielem[k])); within(rows(gfx, l)![2], angle(m.Ielem[k])); });
+    ["IR", "IS", "IT"].forEach((l, k) => { within(rows(gfx, l)![1], mag(m.I[k])); within(rows(gfx, l)![2], angle(m.I[k])); });
+    ["IRS", "IST", "ITR"].forEach((l, k) => { within(rows(gfx, l)![1], mag(m.Ielem[k])); within(rows(gfx, l)![2], angle(m.Ielem[k])); });
     within(rows(gfx, "P W")![1], m.P);
   });
   test("every reference (6) × sequence (2) gives the same phase voltages as the model", () => {
-    for (const ref of ["AN", "BN", "CN", "AB", "BC", "CA"] as const)
-      for (const sequence of ["ABC", "ACB"] as const) {
+    for (const ref of ["RN", "SN", "TN", "RS", "ST", "TR"] as const)
+      for (const sequence of ["RST", "RTS"] as const) {
         const inp: ThreePhaseInput = { sequence, ref, value: 230, angle: -40, connection: "Y3", Z: [[10, 0], [10, 0], [10, 0]] };
         const gfx = run(2, inp);
         const m = solveThreePhase(inp);
-        ["UA", "UB", "UC"].forEach((l, k) => { within(rows(gfx, l)![1], mag(m.V[k])); within(rows(gfx, l)![2], angle(m.V[k])); });
+        ["UR", "US", "UT"].forEach((l, k) => { within(rows(gfx, l)![1], mag(m.V[k])); within(rows(gfx, l)![2], angle(m.V[k])); });
       }
   });
   test("the arctangent is right in every quadrant and near the axes (Aron: φ from P and Q)", () => {

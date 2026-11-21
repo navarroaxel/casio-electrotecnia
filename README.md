@@ -48,15 +48,15 @@ With the exam's rounded 220 V / 30 A / 25 A / 10 A (11 A and 11 A in the branche
 
 Menu: **TENSIONES**, **CARGA**, **RESOLVER**, **MEDICION BALANC.**, **BORRAR TODO**, **SALIR** (arrow keys + `EXE`, or the small number). Data persist (`0 = new`, `1 = go on`).
 
-1. **TENSIONES** — sequence (1 = ABC direct, 2 = ACB inverse) and **one voltage as reference**: which one (U_AN, U_BN, U_CN or the line voltages U_AB, U_BC, U_CA), its rms value and its angle. The other five follow.
-2. **CARGA** — connection (1 star with neutral, 2 star without neutral, 3 delta) and the three impedances as modulus ∠ degrees (phases A B C, or AB BC CA in delta).
-3. **RESOLVER** — page 1: I_A, I_B, I_C as modulus and angle, then I_N = I_A + I_B + I_C (4 wires) or the displacement U_N'N (3 wires), and P, Q, S (S = |P + jQ|). Page 2: the voltages on the load's phases (3 wires) or the phase currents (delta).
+1. **TENSIONES** — sequence (1 = RST direct, 2 = RTS inverse) and **one voltage as reference**: which one (U_RN, U_SN, U_TN or the line voltages U_RS, U_ST, U_TR), its rms value and its angle. The other five follow.
+2. **CARGA** — connection (1 star with neutral, 2 star without neutral, 3 delta) and the three impedances as modulus ∠ degrees (phases R S T, or RS ST TR in delta).
+3. **RESOLVER** — page 1: I_R, I_S, I_T as modulus and angle, then I_N = I_R + I_S + I_T (4 wires) or the displacement U_N'N (3 wires), and P, Q, S (S = |P + jQ|). Page 2: the voltages on the load's phases (3 wires) or the phase currents (delta).
 4. **MEDICION BALANC.** — *one wattmeter* in a line with its voltage coil between the other two (it reads Q/√3: U in V as line or phase voltage, I, W1 → P, Q, S, power factor, φ) or *Aron* (W1, W2 → P = W1 + W2, Q = √3·(W1 − W2)).
 
 Phasors are printed rounded to two decimals, the angle in degrees. The arctangent is written in Basic (two halvings and a series), like sine and cosine in POLIARM.
 
-**Worked example 1** (4 wires, U_BC = 294,2 ∠0°, ABC, Z_A = 10 ∠0°, Z_B = 15 ∠30°, Z_C = 10 ∠−30°): `TENSIONES` → `1`, `5`, `294.2`, `0`; `CARGA` → `1`, `10, 0`, `15, 30`, `10, −30`; `RESOLVER`:
-I_A = 16,99 ∠90°, I_B = 11,32 ∠−60°, I_C = 16,99 ∠−120°, I_N = 8,05 ∠−110,6°.
+**Worked example 1** (4 wires, U_ST = 294,2 ∠0°, RST, Z_R = 10 ∠0°, Z_S = 15 ∠30°, Z_T = 10 ∠−30°): `TENSIONES` → `1`, `5`, `294.2`, `0`; `CARGA` → `1`, `10, 0`, `15, 30`, `10, −30`; `RESOLVER`:
+I_R = 16,99 ∠90°, I_S = 11,32 ∠−60°, I_T = 16,99 ∠−120°, I_N = 8,05 ∠−110,6°.
 
 **Worked example 2** (one wattmeter, 220 V phase, 10 A, W1 = 2193,93 W): `MEDICION BALANC.` → `UN VATIMETRO` → `2` (phase), `220`, `10`, `2193.93`: Q = 3800 var, S = 6600 VA, P = 5396 W, cos φ = 0,818, φ = 35,15°.
 
