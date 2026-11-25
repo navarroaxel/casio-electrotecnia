@@ -132,9 +132,52 @@ Locate 1,1,"CARGA POR:"
 Locate 1,2,"1 Z OHM"
 Locate 1,3,"2 S VA"
 Locate 1,4,"3 P W"
+Locate 1,5,"4 VARIAS P Y COS FI"
 "NRO"?→V
 If V<1:Then 1→V:IfEnd
-If V>3:Then 3→V:IfEnd
+If V>4:Then 4→V:IfEnd
+If V=4:Then
+1→S
+ClrText
+"CANT CARGAS MAX 3"?→N
+If N<1:Then 1→N:IfEnd
+If N>3:Then 3→N:IfEnd
+0→P:0→Q
+For 1→K To N
+ClrText
+Locate 1,1,"CARGA"
+Locate 7,1,K
+"P KW"?→A
+"COS FI NEG=CAP"?→B
+A×1000→A
+Abs (B)→C
+If C>1:Then 1→C:IfEnd
+If C<0.001:Then 0.001→C:IfEnd
+√(1–C×C)÷C→D
+If B<0:Then –D→D:IfEnd
+P+A→P:Q+A×D→Q
+Next
+√(P×P+Q×Q)→F
+0→H:If F>0:Then P÷F→H:IfEnd
+ClrText
+Locate 1,1,"P W"
+Locate 7,1,Intg (P×100+0.5)÷100
+Locate 1,2,"Q VAR"
+Locate 7,2,Intg (Q×100+0.5)÷100
+Locate 1,3,"S VA"
+Locate 7,3,Intg (F×100+0.5)÷100
+Locate 1,4,"FP"
+Locate 7,4,Intg (H×100+0.5)÷100
+While Getkey>0:WhileEnd
+While Getkey=0:WhileEnd
+P÷3→P:Q÷3→Q
+List 1[1]×List 1[1]+List 2[1]×List 2[1]→E
+If T=3:Then (List 1[1]–List 1[2])×(List 1[1]–List 1[2])+(List 2[1]–List 2[2])×(List 2[1]–List 2[2])→E:IfEnd
+P×P+Q×Q→D
+1000000000→List 3[1]:0→List 4[1]
+If D>0:Then E×P÷D→List 3[1]:E×Q÷D→List 4[1]:IfEnd
+IfEnd
+If V<4:Then
 For 1→K To M
 ClrText
 If T<3:Then
@@ -191,6 +234,7 @@ If A>0:Then E÷A→A:IfEnd
 IfEnd
 A×C→List 3[K]:A×D→List 4[K]
 Next
+IfEnd
 If S=1:Then
 List 3[1]→List 3[2]:List 3[1]→List 3[3]:List 4[1]→List 4[2]:List 4[1]→List 4[3]
 IfEnd

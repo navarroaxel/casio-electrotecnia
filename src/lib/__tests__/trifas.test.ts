@@ -528,3 +528,69 @@ describe("VATIMETROS, one wattmeter: U and I left at 0 are the loaded ones", () 
     expect(Math.abs((row("FP")[1] as number) - 0.5)).toBeLessThan(0.0051);
   });
 });
+
+describe("CARGA 4: several loads in parallel, each by P (kW) and cos φ", () => {
+  const K = { TENS: 72, CARGA: 62, SOLVE: 52, EXIT: 71 };
+  const rowOf = (g: ReturnType<typeof newGfx>, label: string) => {
+    for (const sc of [...g.screens].reverse()) {
+      const l = sc.find((x) => x[2] === label && x[0] === 1);
+      if (l) return sc.filter((x) => x[1] === l[1]).map((x) => x[2]);
+    }
+    return undefined;
+  };
+  const close = (v: unknown, ref: number, tol = 0.0051) => expect(Math.abs((v as number) - ref)).toBeLessThanOrEqual(tol);
+  // sequence 1, reference 0 (U_RN = 220 ∠90°), connection, symmetric answer (ignored by the option), CARGA POR 4, the loads
+  const run = (conn: number, loads: number[]) => {
+    const g = newGfx();
+    runBasic(TRIFAS_LINES, [0, 1, 0, conn, 1, 4, loads.length / 2, ...loads], g, newMem(), [K.TENS, K.CARGA, K.SOLVE, K.EXIT]);
+    return g;
+  };
+  const UL = 220 * Math.sqrt(3);
+  // a motor of 40 kW at cos φ = 0,8 and lamps of 1,8 kW at cos φ = 1
+  const MOTOR_LAMPS = [40, 0.8, 1.8, 1];
+
+  test("the totals: P = 41,8 kW, Q = 30 kvar, S = √(P² + Q²), power factor", () => {
+    const g = run(1, MOTOR_LAMPS);
+    const P = 41800, Q = 30000, S = Math.hypot(P, Q);
+    close(rowOf(g, "P W")![1], P, 0.01);
+    close(rowOf(g, "Q VAR")![1], Q, 0.01);
+    close(rowOf(g, "S VA")![1], S, 0.01);
+    close(rowOf(g, "FP")![1], P / S);
+  });
+  test("RESOLVER then gives the line current S / (√3·U_L) lagging U_R by φ = atan(Q/P)", () => {
+    const g = run(1, MOTOR_LAMPS);
+    const S = Math.hypot(41800, 30000), phi = (Math.atan2(30000, 41800) * 180) / Math.PI;
+    const r = rowOf(g, "IR")!;
+    close(r[1], S / (Math.sqrt(3) * UL));
+    close(r[2], 90 - phi);
+    const m = solveThreePhase({ sequence: "RST", ref: "RN", value: 220, angle: 90, connection: "Y4", Z: [[220 ** 2 / (S / 3), phi], [220 ** 2 / (S / 3), phi], [220 ** 2 / (S / 3), phi]] });
+    close(r[1], mag(m.I[0]));
+  });
+  test("one load by P and cos φ is the same load as by S and the angle (50 kW at 0,5 = 100 kVA at 60°)", () => {
+    const g4 = run(1, [50, 0.5]);
+    const gs = newGfx();
+    runBasic(TRIFAS_LINES, [0, 1, 0, 1, 1, 2, 100000, 60], gs, newMem(), [K.TENS, K.CARGA, K.SOLVE, K.EXIT]);
+    const a = rowOf(g4, "IR")!, b = rowOf(gs, "IR")!;
+    close(a[1], b[1] as number, 0.0051);
+    close(a[2], b[2] as number, 0.0051);
+  });
+  test("a negative cos φ is a capacitive load: the current leads U_R", () => {
+    const r = rowOf(run(1, [10, -0.8]), "IR")!;
+    close(r[2], 90 + (Math.acos(0.8) * 180) / Math.PI);
+  });
+  test("three loads add up, in delta too (same line current: the load is the same)", () => {
+    const loads = [20, 0.8, 10, 0.6, 5, 1];
+    const star = rowOf(run(1, loads), "IR")!;
+    const delta = rowOf(run(3, loads), "IR")!;
+    close(delta[1], star[1] as number);
+    close(delta[2], star[2] as number);
+    const P = 35000, Q = 20000 * 0.75 + 10000 * (0.8 / 0.6);
+    close(star[1], Math.hypot(P, Q) / (Math.sqrt(3) * UL));
+  });
+  test("more than 3 loads are cut to 3 and a cos φ above 1 is taken as 1", () => {
+    const g = newGfx();
+    runBasic(TRIFAS_LINES, [0, 1, 0, 1, 1, 4, 9, 10, 1.5, 10, 1, 10, 1] /* 9 asked → 3 loads read */, g, newMem(), [K.TENS, K.CARGA, K.SOLVE, K.EXIT]);
+    close(rowOf(g, "P W")![1], 30000, 0.01);
+    close(rowOf(g, "Q VAR")![1], 0, 0.01);
+  });
+});

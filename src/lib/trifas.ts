@@ -297,6 +297,49 @@ export const FASORIAL_LINES = [
 // the three load elements (phases R S T, or RS ST TR in delta); 5 / 6 = line currents; 7 / 8 = voltage on each element;
 // List 9 = {P, Q, S, Re / Im of I_N (4 wires) or of the displacement U_N'N (3 wires), …, element currents at 10-15};
 // List 10 = {connection 1 = star 4 wires, 2 = star 3 wires, 3 = delta}. They persist: 0 = new, 1 = go on.
+// CARGA, option 4: up to 3 balanced loads in parallel (a motor and lamps, …), each by its P in kW and cos φ (a negative cos φ is a
+// capacitive load). P and Q add up (Q = P·tan φ) and the total is the symmetric load of the three phases: with S = P + jQ per phase
+// (a third of the total) and U the voltage on the element, Z = U²/S* = U²·(P + jQ)/(P² + Q²), with no angle needed.
+// A screen shows the total P, Q, S and the power factor.
+const MULTI_LOADS = [
+  "If V=4:Then",
+  "1→S",
+  "ClrText",
+  '"CANT CARGAS MAX 3"?→N',
+  "If N<1:Then 1→N:IfEnd",
+  "If N>3:Then 3→N:IfEnd",
+  "0→P:0→Q",
+  "For 1→K To N",
+  "ClrText",
+  'Locate 1,1,"CARGA"',
+  "Locate 7,1,K",
+  '"P KW"?→A',
+  '"COS FI NEG=CAP"?→B',
+  "A×1000→A",
+  "Abs (B)→C",
+  "If C>1:Then 1→C:IfEnd",
+  "If C<0.001:Then 0.001→C:IfEnd",
+  "√(1–C×C)÷C→D",
+  "If B<0:Then –D→D:IfEnd",
+  "P+A→P:Q+A×D→Q",
+  "Next",
+  "√(P×P+Q×Q)→F",
+  "0→H:If F>0:Then P÷F→H:IfEnd",
+  "ClrText",
+  ...valueRow(1, "P W", "P"),
+  ...valueRow(2, "Q VAR", "Q"),
+  ...valueRow(3, "S VA", "F"),
+  ...valueRow(4, "FP", "H"),
+  ...PAUSE,
+  "P÷3→P:Q÷3→Q",
+  "List 1[1]×List 1[1]+List 2[1]×List 2[1]→E",
+  "If T=3:Then (List 1[1]–List 1[2])×(List 1[1]–List 1[2])+(List 2[1]–List 2[2])×(List 2[1]–List 2[2])→E:IfEnd",
+  "P×P+Q×Q→D",
+  "1000000000→List 3[1]:0→List 4[1]",
+  "If D>0:Then E×P÷D→List 3[1]:E×Q÷D→List 4[1]:IfEnd",
+  "IfEnd",
+];
+
 export const TRIFAS_LINES = [
   '"0=NUEVO 1=SEGUIR"?→A',
   "If A=0:Then",
@@ -380,9 +423,12 @@ export const TRIFAS_LINES = [
   'Locate 1,2,"1 Z OHM"',
   'Locate 1,3,"2 S VA"',
   'Locate 1,4,"3 P W"',
+  'Locate 1,5,"4 VARIAS P Y COS FI"',
   '"NRO"?→V',
   "If V<1:Then 1→V:IfEnd",
-  "If V>3:Then 3→V:IfEnd",
+  "If V>4:Then 4→V:IfEnd",
+  ...MULTI_LOADS,
+  "If V<4:Then",
   "For 1→K To M",
   "ClrText",
   "If T<3:Then",
@@ -415,6 +461,7 @@ export const TRIFAS_LINES = [
   "IfEnd",
   "A×C→List 3[K]:A×D→List 4[K]",
   "Next",
+  "IfEnd",
   "If S=1:Then",
   "List 3[1]→List 3[2]:List 3[1]→List 3[3]:List 4[1]→List 4[2]:List 4[1]→List 4[3]",
   "IfEnd",
