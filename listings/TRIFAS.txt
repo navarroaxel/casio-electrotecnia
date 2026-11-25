@@ -133,9 +133,10 @@ Locate 1,2,"1 Z OHM"
 Locate 1,3,"2 S VA"
 Locate 1,4,"3 P W"
 Locate 1,5,"4 VARIAS P Y COS FI"
+Locate 1,6,"5 MOTOR Y CARGAS FASE"
 "NRO"?→V
 If V<1:Then 1→V:IfEnd
-If V>4:Then 4→V:IfEnd
+If V>5:Then 5→V:IfEnd
 If V=4:Then
 1→S
 ClrText
@@ -176,6 +177,55 @@ If T=3:Then (List 1[1]–List 1[2])×(List 1[1]–List 1[2])+(List 2[1]–List 2
 P×P+Q×Q→D
 1000000000→List 3[1]:0→List 4[1]
 If D>0:Then E×P÷D→List 3[1]:E×Q÷D→List 4[1]:IfEnd
+IfEnd
+If V=5:Then
+0→S
+ClrText
+Locate 1,1,"MOTOR TRIFASICO"
+"P KW 0=NO"?→A
+A×1000÷3→P:0→Q
+If A>0:Then
+"COS FI NEG=CAP"?→B
+Abs (B)→C
+If C>1:Then 1→C:IfEnd
+If C<0.001:Then 0.001→C:IfEnd
+√(1–C×C)÷C→D
+If B<0:Then –D→D:IfEnd
+P×D→Q
+IfEnd
+For 1→K To 3
+ClrText
+If T<3:Then
+If K=1:Then Locate 1,1,"CARGA FASE R":IfEnd
+If K=2:Then Locate 1,1,"CARGA FASE S":IfEnd
+If K=3:Then Locate 1,1,"CARGA FASE T":IfEnd
+IfEnd
+If T=3:Then
+If K=1:Then Locate 1,1,"CARGA ENTRE R Y S":IfEnd
+If K=2:Then Locate 1,1,"CARGA ENTRE S Y T":IfEnd
+If K=3:Then Locate 1,1,"CARGA ENTRE T Y R":IfEnd
+IfEnd
+"P KW 0=NO"?→A
+P→G:Q→H
+If A>0:Then
+"COS FI NEG=CAP"?→B
+A×1000→A
+Abs (B)→C
+If C>1:Then 1→C:IfEnd
+If C<0.001:Then 0.001→C:IfEnd
+√(1–C×C)÷C→D
+If B<0:Then –D→D:IfEnd
+G+A→G:H+A×D→H
+IfEnd
+List 1[K]×List 1[K]+List 2[K]×List 2[K]→E
+If T=3:Then
+K+1→J:If J>3:Then 1→J:IfEnd
+(List 1[K]–List 1[J])×(List 1[K]–List 1[J])+(List 2[K]–List 2[J])×(List 2[K]–List 2[J])→E
+IfEnd
+G×G+H×H→D
+1000000000→List 3[K]:0→List 4[K]
+If D>0:Then E×G÷D→List 3[K]:E×H÷D→List 4[K]:IfEnd
+Next
 IfEnd
 If V<4:Then
 For 1→K To M
@@ -403,6 +453,32 @@ Locate 5,J,Intg (List 25[J]×100+0.5)÷100
 Next
 Locate 1,7,"P W"
 Locate 7,7,Intg (List 9[1]×100+0.5)÷100
+While Getkey>0:WhileEnd
+While Getkey=0:WhileEnd
+For 1→K To 3
+List 7[K]→A:List 8[K]→B:List 9[8+2×K]→C:List 9[9+2×K]→D
+A×C+B×D→List 21[K]:B×C–A×D→List 22[K]
+√(List 21[K]×List 21[K]+List 22[K]×List 22[K])→List 23[K]
+List 1[K]×List 17[K]+List 2[K]×List 18[K]→List 24[K]
+Next
+ClrText
+Locate 1,1,"PR":Locate 1,2,"PS":Locate 1,3,"PT":Locate 1,4,"QR":Locate 1,5,"QS":Locate 1,6,"QT"
+For 1→J To 3
+Locate 5,J,Intg (List 21[J]×100+0.5)÷100
+Locate 5,J+3,Intg (List 22[J]×100+0.5)÷100
+Next
+Locate 1,7,"P TOT"
+Locate 7,7,Intg (List 9[1]×100+0.5)÷100
+While Getkey>0:WhileEnd
+While Getkey=0:WhileEnd
+ClrText
+Locate 1,1,"SR":Locate 1,2,"SS":Locate 1,3,"ST":Locate 1,4,"WRN":Locate 1,5,"WSN":Locate 1,6,"WTN"
+For 1→J To 3
+Locate 5,J,Intg (List 23[J]×100+0.5)÷100
+Locate 5,J+3,Intg (List 24[J]×100+0.5)÷100
+Next
+Locate 1,7,"S TOT"
+Locate 7,7,Intg (List 9[3]×100+0.5)÷100
 While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 IfEnd

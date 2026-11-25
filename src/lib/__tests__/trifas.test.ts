@@ -594,3 +594,67 @@ describe("CARGA 4: several loads in parallel, each by P (kW) and cos φ", () => 
     close(rowOf(g, "Q VAR")![1], 0, 0.01);
   });
 });
+
+describe("CARGA 5 (motor + loads on each phase) and the per-phase pages of RESOLVER", () => {
+  const K = { TENS: 72, CARGA: 62, SOLVE: 52, EXIT: 71 };
+  const rowOf = (g: ReturnType<typeof newGfx>, label: string) => {
+    for (const sc of [...g.screens].reverse()) {
+      const l = sc.find((x) => x[2] === label && x[0] === 1);
+      if (l) return sc.filter((x) => x[1] === l[1]).map((x) => x[2]);
+    }
+    return undefined;
+  };
+  const val = (g: ReturnType<typeof newGfx>, label: string) => rowOf(g, label)![1] as number;
+  const near = (v: number, ref: number, rel: number) => expect(Math.abs(v - ref)).toBeLessThanOrEqual(Math.abs(ref) * rel + 0.01);
+  const run = (inputs: number[]) => {
+    const g = newGfx();
+    runBasic(TRIFAS_LINES, inputs, g, newMem(), [K.TENS, K.CARGA, K.SOLVE, K.EXIT]);
+    return g;
+  };
+  // the guides work with U_RN = 220 V (their I_R = 5,79 A in 611 is 220 / 38): the default reference, U_RN = 220 ∠90°
+  const U220 = [0, 1, 0];
+
+  test("guide 615: motor 60 kW at 0,85 + 24 kW on R, 15 kW on S, 9 kW on T (cos φ = 1): P = 108 kW, W_RN 44 kW, W_SN 35 kW, W_TN 29 kW", () => {
+    const g = run([0, 1, 0, 1, 0, 5, 60, 0.85, 24, 1, 15, 1, 9, 1]);
+    near(val(g, "P TOT"), 108000, 1e-6);
+    // the guide's 44 040 / 35 048 / 29 044 W: the same up to its rounding (0,2 %); the exact values are 44 000 / 35 000 / 29 000
+    near(val(g, "WRN"), 44040, 2e-3);
+    near(val(g, "WSN"), 35048, 2e-3);
+    near(val(g, "WTN"), 29044, 2e-3);
+    near(val(g, "WRN"), 44000, 1e-6);
+    near(val(g, "WSN"), 35000, 1e-6);
+    near(val(g, "WTN"), 29000, 1e-6);
+    // each phase: P = its lamps + a third of the motor, Q = a third of the motor's
+    const Qm = (60000 * Math.tan(Math.acos(0.85))) / 3;
+    [["PR", 44000], ["PS", 35000], ["PT", 29000]].forEach(([l, p]) => near(val(g, l as string), p as number, 1e-6));
+    ["QR", "QS", "QT"].forEach((l) => near(val(g, l), Qm, 1e-6));
+    near(val(g, "SR"), Math.hypot(44000, Qm), 1e-6);
+    near(val(g, "IR"), Math.hypot(44000, Qm) / 220, 1e-5);
+  });
+  test("a motor alone is the same load as option 4 with that motor", () => {
+    const a = rowOf(run([0, 1, 0, 1, 0, 5, 50, 0.8, 0, 0, 0]), "IR")!;
+    const b = rowOf(run([0, 1, 0, 1, 1, 4, 1, 50, 0.8]), "IR")!;
+    expect(a).toEqual(b);
+  });
+  test("delta: the loads are those between the lines (a third of the motor on each, plus 10 kW between R and S)", () => {
+    const g = run([0, 1, 0, 3, 0, 5, 30, 0.8, 10, 1, 0, 0]);
+    near(val(g, "P TOT"), 40000, 1e-6);
+    near(val(g, "PR"), 20000, 1e-6); // element RS
+    near(val(g, "PS"), 10000, 1e-6);
+    near(val(g, "PT"), 10000, 1e-6);
+  });
+  test("guide 611 (4 wires, 38∠30°, 22∠45°, 33∠0°): P, Q and S of each phase", () => {
+    const g = run([...U220, 1, 0, 1, 38, 30, 22, 45, 33, 0]);
+    [["PR", 1103.1], ["PS", 1555.6], ["PT", 1467.4], ["QR", 636.9], ["QS", 1555.6], ["QT", 0], ["SR", 1273.8], ["SS", 2200], ["ST", 1467.4]].forEach(([l, v]) => near(val(g, l as string), v as number, 1e-3));
+    // the guide gives PTRIF = 4113,6 W, but its own PR + PS + PT = 4126,1 W (0,3 % apart): the program is the sum of the phases
+    near(val(g, "P W"), 1103.1 + 1555.6 + 1467.4, 1e-3);
+  });
+  test("guide 612 (3 wires, 10 + j10, 20 + j20, 30 + j30): P, Q and S of each phase", () => {
+    const g = run([...U220, 2, 0, 1, Math.hypot(10, 10), 45, Math.hypot(20, 20), 45, Math.hypot(30, 30), 45]);
+    [["PR", 1139.3], ["PS", 1559.7], ["PT", 1259.8], ["QR", 1139.3], ["QS", 1559.7], ["QT", 1259.8], ["SR", 1611.2], ["SS", 2205.7], ["ST", 1781.7]].forEach(([l, v]) => near(val(g, l as string), v as number, 1e-3));
+    near(val(g, "P TOT"), 3958.8, 1e-3);
+  });
+  test("an empty motor and empty phases do not break RESOLVER (an open load)", () => {
+    expect(() => run([0, 1, 0, 1, 0, 5, 0, 0, 0, 0])).not.toThrow();
+  });
+});
