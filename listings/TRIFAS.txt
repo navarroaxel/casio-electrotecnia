@@ -191,7 +191,7 @@ IfEnd
 If O=2:Then
 1→S:1→Y
 ClrText
-Locate 1,1,"CONEXION (4 = VER)"
+Locate 1,1,"CARGA"
 Locate 3,2,"ESTRELLA 4 HILOS¹"
 Locate 3,3,"ESTRELLA 3 HILOS²"
 Locate 3,4,"TRIANGULO³"

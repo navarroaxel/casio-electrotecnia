@@ -502,7 +502,7 @@ export const TRIFAS_LINES = [
   "IfEnd",
   // 2: the load
   "If O=2:Then",
-  ...pickMenu({ title: "CONEXION (4 = VER)", items: ["ESTRELLA 4 HILOS", "ESTRELLA 3 HILOS", "TRIANGULO", "VER"], choice: "T" }),
+  ...pickMenu({ title: "CARGA", items: ["ESTRELLA 4 HILOS", "ESTRELLA 3 HILOS", "TRIANGULO", "VER"], choice: "T" }),
   "If T<1:Then 1→T:IfEnd",
   "0→Z:If T=4:Then 1→Z:IfEnd",
   "If Z=1:Then",

@@ -655,7 +655,7 @@ describe("CARGA 4: VER shows the stored load without asking or changing anything
   });
   test("it is the fourth item of the first CARGA menu", () => {
     const g = go(TRIFAS_LINES, flow(nuevo(), tens(), verCarga(), exit()));
-    const sc = g.screens.find((s) => s.some((x) => x[2] === "CONEXION (4 = VER)"))!;
+    const sc = g.screens.find((s) => s.some((x) => x[2] === "CARGA"))!;
     expect(sc.filter((x) => x[0] === 3).map((x) => x[2])).toEqual(["ESTRELLA 4 HILOS¹", "ESTRELLA 3 HILOS²", "TRIANGULO³", "VER⁴"]);
   });
 });
