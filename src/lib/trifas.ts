@@ -30,9 +30,10 @@ const POLAR = (n: number): string[] => [
   "X→List 23[J]:Y→List 24[J]",
   "Next",
 ];
-// print the polar form of entry `k` (Lists 23 / 24) at the row `row`: modulus at column 4, angle at column 13, 2 decimals
+// print the polar form of entry `k` (Lists 23 / 24) at the row `row`: modulus at column 5 (after a label of up to 3 letters and a
+// space), angle at column 13, 2 decimals
 const showPolar = (row: string | number, k: string | number): string[] => [
-  `Locate 4,${row},Intg (List 23[${k}]×100+0.5)÷100`,
+  `Locate 5,${row},Intg (List 23[${k}]×100+0.5)÷100`,
   `Locate 13,${row},Intg (List 24[${k}]×100+0.5)÷100`,
 ];
 
@@ -513,6 +514,22 @@ export const TRIFAS_LINES = [
   "Next",
   ...PAUSE,
   "IfEnd",
+  // page 3: the two wattmeters for each choice of the common line, on the line currents ahead of the bank (Lists 17 / 18):
+  // W_ac = Re((U_a − U_c)·I_a*) in the order WRT WST WRS WTS WSR WTR (a and c from Lists 26 / 27), and P of the page 1
+  "{0,0,0,0,0,0}→List 25",
+  "{1,2,1,3,2,3}→List 26",
+  "{3,3,2,2,1,1}→List 27",
+  "For 1→K To 6",
+  "List 26[K]→A:List 27[K]→C",
+  "(List 1[A]–List 1[C])×List 17[A]+(List 2[A]–List 2[C])×List 18[A]→List 25[K]",
+  "Next",
+  "ClrText",
+  'Locate 1,1,"WRT":Locate 1,2,"WST":Locate 1,3,"WRS":Locate 1,4,"WTS":Locate 1,5,"WSR":Locate 1,6,"WTR"',
+  "For 1→J To 6",
+  "Locate 5,J,Intg (List 25[J]×100+0.5)÷100",
+  "Next",
+  ...valueRow(7, "P W", "List 9[1]"),
+  ...PAUSE,
   "IfEnd",
   // 4: capacitor bank in delta (after RESOLVER)
   ...BANK_LINES,
@@ -549,10 +566,20 @@ export const TRIFAS_LINES = [
   "IfEnd",
   "If X=1:Then",
   "ClrText",
+  // U and I of the exercise are the ones already loaded when left at 0: the line voltage |U_R − U_S| from TENSIONES and the
+  // current of the line R from RESOLVER
+  '"U V 0=CARGADA"?→A',
+  "0→Y",
+  "If A=0:Then 1→Y:IfEnd",
+  "If Y=1:Then",
+  "List 1[1]–List 1[2]→D:List 2[1]–List 2[2]→E:√(D×D+E×E)→A",
+  "IfEnd",
+  "If Y=0:Then",
   '"1=LINEA 2=FASE"?→T',
-  '"U EFICAZ V"?→A',
   "If T=2:Then A×√(3)→A:IfEnd",
-  '"I LINEA A"?→B',
+  "IfEnd",
+  '"I A 0=DE RESOLVER"?→B',
+  "If B=0:Then √(List 5[1]×List 5[1]+List 6[1]×List 6[1])→B:IfEnd",
   '"W1 W"?→C',
   "√(3)×C→Q",
   "√(3)×A×B→S",

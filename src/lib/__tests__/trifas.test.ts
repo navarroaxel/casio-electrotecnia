@@ -151,7 +151,7 @@ describe("TRIFAS listing run by the interpreter", () => {
   });
   test("one wattmeter (exercise 2) from the listing", () => {
     const gfx = newGfx();
-    runBasic(TRIFAS_LINES, [0, 1, 2, 220, 10, 2193.93], gfx, newMem(), [K.MED, K.EXIT]); // 1 = UN VATIMETRO
+    runBasic(TRIFAS_LINES, [0, 1, 220, 2, 10, 2193.93], gfx, newMem(), [K.MED, K.EXIT]); // 1 = UN VATIMETRO: U 220, 2 = FASE, I 10, W1
     const m = oneWattmeter(220 * Math.sqrt(3), 10, 2193.93);
     within(rows(gfx, "Q VAR")![1], m.Q);
     within(rows(gfx, "S VA")![1], m.S);
@@ -450,5 +450,81 @@ describe("CARGA: symmetric load and the load given by Z, S or P", () => {
   test("not symmetric: S and P are those of each phase", () => {
     const r = line(run([1, 0, 2, 33333.333, 60, 33333.333, 60, 33333.333, 60]), "IR")!;
     expect(r[1] as number).toBeCloseTo(100000 / (Math.sqrt(3) * UL), 2);
+  });
+});
+
+describe("RESOLVER: the wattmeters page and no label glued to its value", () => {
+  const K = { TENS: 72, CARGA: 62, SOLVE: 52, BANCO: 73, EXIT: 71 };
+  const run = (inputs: number[], keys: number[]) => {
+    const g = newGfx();
+    runBasic(TRIFAS_LINES, inputs, g, newMem(), keys);
+    return g;
+  };
+  const rowOf = (g: ReturnType<typeof newGfx>, label: string) => {
+    for (const sc of [...g.screens].reverse()) {
+      const l = sc.find((x) => x[2] === label && x[0] === 1);
+      if (l) return sc.filter((x) => x[1] === l[1]).map((x) => x[2]);
+    }
+    return undefined;
+  };
+  const w = (u: [number, number], i: [number, number]) => u[0] * i[0] + u[1] * i[1];
+  const d = (a: [number, number], b: [number, number]): [number, number] => [a[0] - b[0], a[1] - b[1]];
+  const close = (v: unknown, ref: number, tol = 0.0051) => expect(Math.abs((v as number) - ref)).toBeLessThanOrEqual(tol);
+  // U_RN = 220 ∠90° (0), the load by S: 100 kVA total at 60°, symmetric, star with neutral
+  const FIG = [0, 1, 0, 1, 1, 2, 100000, 60];
+
+  test("the six readings are Re(U·I*) of the model (guide 608, star without neutral): WRT = 3309 W, WST = −1097 W, …", () => {
+    const inp: ThreePhaseInput = { sequence: "RST", ref: "RN", value: 220, angle: 90, connection: "Y3", Z: [[22, 0], [38, 90], [38, -90]] };
+    const g = run([0, 1, 1, 220, 90, 2, 0, 1, 22, 0, 38, 90, 38, -90], [K.TENS, K.CARGA, K.SOLVE, K.EXIT]);
+    const m = solveThreePhase(inp);
+    const U = m.U as [number, number][], I = m.I as [number, number][];
+    const expected: [string, number, number][] = [["WRT", 0, 2], ["WST", 1, 2], ["WRS", 0, 1], ["WTS", 2, 1], ["WSR", 1, 0], ["WTR", 2, 0]];
+    for (const [label, a, c] of expected) close(rowOf(g, label)![1], w(d(U[a], U[c]), I[a]));
+    close(rowOf(g, "P W")![1], m.P);
+    close(rowOf(g, "WRT")![1], 3290, 33); // the guide, which rounds U_L to 380 V
+    close(rowOf(g, "WST")![1], -1100, 11);
+  });
+  test("the figure: with the common line S, W_RS = 0 and W_TS = 50 kW; with the bank to cos φ' = 1 (RESOLVER again) 25 kW and 25 kW", () => {
+    const g = run(FIG, [K.TENS, K.CARGA, K.SOLVE, K.EXIT]);
+    close(rowOf(g, "WRS")![1], 0, 0.01);
+    close(rowOf(g, "WTS")![1], 50000, 1);
+    const b = run([...FIG, 2, 0, 1], [K.TENS, K.CARGA, K.SOLVE, K.BANCO, K.SOLVE, K.EXIT]);
+    close(rowOf(b, "WRS")![1], 25000, 1);
+    close(rowOf(b, "WTS")![1], 25000, 1);
+  });
+  test("every screen: a label of up to 3 letters is followed by a space before its value (it read UNN0 as one word)", () => {
+    const scenarios: [number[], number[]][] = [
+      [[0, 1, 0, 2, 0, 1, 10, 0, 15, 30, 10, -30], [K.TENS, K.CARGA, K.SOLVE, K.EXIT]], // star without neutral: UNN, UR US UT
+      [[0, 1, 0, 1, 0, 1, 10, 0, 15, 30, 10, -30], [K.TENS, K.CARGA, K.SOLVE, K.EXIT]], // 4 wires: IN
+      [[0, 1, 0, 3, 0, 1, 10, 0, 15, 30, 10, -30], [K.TENS, K.CARGA, K.SOLVE, K.EXIT]], // delta: IRS IST ITR
+      [[...FIG, 1, 50, 100], [K.TENS, K.CARGA, K.SOLVE, K.BANCO, K.EXIT]], // the bank: ILR ILS ILT IRC ISC ITC
+    ];
+    let checked = 0;
+    for (const [inputs, keys] of scenarios) {
+      const g = run(inputs, keys);
+      for (const sc of g.screens) {
+        for (const lab of sc.filter((x) => x[0] === 1 && typeof x[2] === "string" && (x[2] as string).trim() !== "")) {
+          const others = sc.filter((x) => x[1] === lab[1] && x[0] > 1 && !(typeof x[2] === "string" && x[2] === " "));
+          for (const o of others) {
+            expect(o[0]).toBeGreaterThan(1 + (lab[2] as string).length); // at least one blank column
+            checked++;
+          }
+        }
+      }
+    }
+    expect(checked).toBeGreaterThan(20);
+  });
+});
+
+describe("VATIMETROS, one wattmeter: U and I left at 0 are the loaded ones", () => {
+  test("after TENSIONES, CARGA and RESOLVER (the figure: 100 kVA, φ = 60°), W1 = Q/√3 gives S = 100 kVA, P = 50 kW, cos φ = 0,5 with no U or I typed", () => {
+    const g = newGfx();
+    const Q = 100000 * Math.sin(Math.PI / 3);
+    // sequence 1, reference 0; star with neutral, symmetric, by S; then VATIMETROS (6) → 1: U 0, I 0, W1
+    runBasic(TRIFAS_LINES, [0, 1, 0, 1, 1, 2, 100000, 60, 1, 0, 0, Q / Math.sqrt(3)], g, newMem(), [72, 62, 52, 53, 71]);
+    const row = (l: string) => g.screens.flatMap((sc) => sc.filter((x) => x[2] === l && x[0] === 1).map((x) => sc.filter((y) => y[1] === x[1]).map((y) => y[2]))).pop()!;
+    expect(Math.abs((row("S VA")[1] as number) - 100000)).toBeLessThan(1);
+    expect(Math.abs((row("P W")[1] as number) - 50000)).toBeLessThan(1);
+    expect(Math.abs((row("FP")[1] as number) - 0.5)).toBeLessThan(0.0051);
   });
 });

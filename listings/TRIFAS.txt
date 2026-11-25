@@ -317,13 +317,13 @@ Next
 ClrText
 Locate 1,1,"IR":Locate 1,2,"IS":Locate 1,3,"IT"
 For 1→J To 3
-Locate 4,J,Intg (List 23[J]×100+0.5)÷100
+Locate 5,J,Intg (List 23[J]×100+0.5)÷100
 Locate 13,J,Intg (List 24[J]×100+0.5)÷100
 Next
 If T=1:Then Locate 1,4,"IN":IfEnd
 If T=2:Then Locate 1,4,"UNN":IfEnd
 If T<3:Then
-Locate 4,4,Intg (List 23[4]×100+0.5)÷100
+Locate 5,4,Intg (List 23[4]×100+0.5)÷100
 Locate 13,4,Intg (List 24[4]×100+0.5)÷100
 IfEnd
 Locate 1,5,"P W"
@@ -339,12 +339,28 @@ ClrText
 If T=2:Then Locate 1,1,"UR":Locate 1,2,"US":Locate 1,3,"UT":IfEnd
 If T=3:Then Locate 1,1,"IRS":Locate 1,2,"IST":Locate 1,3,"ITR":IfEnd
 For 1→J To 3
-Locate 4,J,Intg (List 23[J+4]×100+0.5)÷100
+Locate 5,J,Intg (List 23[J+4]×100+0.5)÷100
 Locate 13,J,Intg (List 24[J+4]×100+0.5)÷100
 Next
 While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 IfEnd
+{0,0,0,0,0,0}→List 25
+{1,2,1,3,2,3}→List 26
+{3,3,2,2,1,1}→List 27
+For 1→K To 6
+List 26[K]→A:List 27[K]→C
+(List 1[A]–List 1[C])×List 17[A]+(List 2[A]–List 2[C])×List 18[A]→List 25[K]
+Next
+ClrText
+Locate 1,1,"WRT":Locate 1,2,"WST":Locate 1,3,"WRS":Locate 1,4,"WTS":Locate 1,5,"WSR":Locate 1,6,"WTR"
+For 1→J To 6
+Locate 5,J,Intg (List 25[J]×100+0.5)÷100
+Next
+Locate 1,7,"P W"
+Locate 7,7,Intg (List 9[1]×100+0.5)÷100
+While Getkey>0:WhileEnd
+While Getkey=0:WhileEnd
 IfEnd
 If O=4:Then
 ClrText
@@ -430,7 +446,7 @@ Next
 ClrText
 Locate 1,1,"ILR":Locate 1,2,"ILS":Locate 1,3,"ILT"
 For 1→J To 3
-Locate 4,J,Intg (List 23[J]×100+0.5)÷100
+Locate 5,J,Intg (List 23[J]×100+0.5)÷100
 Locate 13,J,Intg (List 24[J]×100+0.5)÷100
 Next
 Locate 1,4,"C UF"
@@ -446,7 +462,7 @@ While Getkey=0:WhileEnd
 ClrText
 Locate 1,1,"IRC":Locate 1,2,"ISC":Locate 1,3,"ITC"
 For 1→J To 3
-Locate 4,J,Intg (List 23[J+3]×100+0.5)÷100
+Locate 5,J,Intg (List 23[J+3]×100+0.5)÷100
 Locate 13,J,Intg (List 24[J+3]×100+0.5)÷100
 Next
 While Getkey>0:WhileEnd
@@ -636,10 +652,18 @@ While Getkey=0:WhileEnd
 IfEnd
 If X=1:Then
 ClrText
+"U V 0=CARGADA"?→A
+0→Y
+If A=0:Then 1→Y:IfEnd
+If Y=1:Then
+List 1[1]–List 1[2]→D:List 2[1]–List 2[2]→E:√(D×D+E×E)→A
+IfEnd
+If Y=0:Then
 "1=LINEA 2=FASE"?→T
-"U EFICAZ V"?→A
 If T=2:Then A×√(3)→A:IfEnd
-"I LINEA A"?→B
+IfEnd
+"I A 0=DE RESOLVER"?→B
+If B=0:Then √(List 5[1]×List 5[1]+List 6[1]×List 6[1])→B:IfEnd
 "W1 W"?→C
 √(3)×C→Q
 √(3)×A×B→S
