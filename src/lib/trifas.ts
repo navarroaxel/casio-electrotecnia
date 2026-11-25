@@ -607,12 +607,11 @@ export const TRIFAS_LINES = [
   ...PAUSE,
   "IfEnd",
   // page 3: the two wattmeters for each choice of the common line, on the line currents ahead of the bank (Lists 17 / 18):
-  // W_ac = Re((U_a − U_c)·I_a*) in the order WRT WST WRS WTS WSR WTR (a and c from Lists 26 / 27), and P of the page 1
+  // W_ac = Re((U_a − U_c)·I_a*) in the order WRT WST WRS WTS WSR WTR (a and c from List 26), and P of the page 1
   "{0,0,0,0,0,0}→List 25",
-  "{1,2,1,3,2,3}→List 26",
-  "{3,3,2,2,1,1}→List 27",
+  "{13,23,12,32,21,31}→List 26", // a·10 + c for each reading: 13 = (R, T), 23 = (S, T), 12, 32, 21, 31 (the calculator has Lists 1 to 26)
   "For 1→K To 6",
-  "List 26[K]→A:List 27[K]→C",
+  "Intg (List 26[K]÷10)→A:List 26[K]–10×A→C",
   "(List 1[A]–List 1[C])×List 17[A]+(List 2[A]–List 2[C])×List 18[A]→List 25[K]",
   "Next",
   "ClrText",
