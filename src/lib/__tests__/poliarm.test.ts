@@ -84,7 +84,7 @@ describe("POLIARM (phasors) against the waveform and the exercise's numbers", ()
 
 describe("POLIARM listing run by the interpreter", () => {
   // keys: 1 ARMONICOS, 2 RAMAS, 3 SIN COMPENSAR, 4 COMPENSAR, 5 POR ARMONICO, 0 salir (number keys of the menu)
-  const K = { ARM: 72, RAM: 62, OPEN: 52, COMP: 73, EACH: 63, EXIT: 71 };
+  const K = { NEW: 72, KEEP: 62, ARM: 72, RAM: 62, OPEN: 52, COMP: 73, EACH: 63, EXIT: 71 }; // NEW / KEEP: the start menu (NUEVOS / SEGUIR GUARDADOS)
   const ARM_INPUTS = [1, 50, 3, /* h1 */ 1, 311, 0, 42.42, 0, /* h2 */ 2, 0, 35.35, -30, /* h3 */ 3, 0, 14.142, 60];
   const RAM_INPUTS = [2, 10, 17.32, 0, 20, 0, 0];
   const screens = (gfx: ReturnType<typeof newGfx>) => gfx.screens.filter((sc) => sc.length > 0);
@@ -95,7 +95,7 @@ describe("POLIARM listing run by the interpreter", () => {
 
   test("SIN COMPENSAR gives the same I, P, Q, S, D, FP, THD as the phasor model", () => {
     const gfx = newGfx();
-    runBasic(POLIARM_LINES, [0, ...ARM_INPUTS, ...RAM_INPUTS], gfx, newMem(), [K.ARM, K.RAM, K.OPEN, K.EXIT]);
+    runBasic(POLIARM_LINES, [...ARM_INPUTS, ...RAM_INPUTS], gfx, newMem(), [K.NEW, K.ARM, K.RAM, K.OPEN, K.EXIT]);
     const sc = screens(gfx).find((s) => s.some((x) => x[2] === "I EF A"))!;
     const m = poliarm(EXERCISE);
     expect(value(sc, "I EF A")).toBeCloseTo(m.Irms, 5);
@@ -113,20 +113,20 @@ describe("POLIARM listing run by the interpreter", () => {
 
   test("COMPENSAR 100 % gives the compensated values and C in µF", () => {
     const gfx = newGfx();
-    runBasic(POLIARM_LINES, [0, ...ARM_INPUTS, ...RAM_INPUTS, 100], gfx, newMem(), [K.ARM, K.RAM, K.COMP, K.EXIT]);
+    runBasic(POLIARM_LINES, [...ARM_INPUTS, ...RAM_INPUTS, 100], gfx, newMem(), [K.NEW, K.ARM, K.RAM, K.COMP, K.EXIT]);
     const sc = screens(gfx).find((s) => s.some((x) => x[2] === "I EF A"))!;
     const m = poliarm(EXERCISE, 100);
     expect(value(sc, "I EF A")).toBeCloseTo(m.Irms, 5);
     expect(value(sc, "Q VAR")).toBeCloseTo(0, 3);
     expect(value(sc, "THD I %")).toBeCloseTo(m.THDi, 4);
-    const sc2 = screens(gfx).find((s) => s.some((x) => x[2] === "C UF"))!;
-    expect(value(sc2, "C UF")).toBeCloseTo(m.C!, 4);
+    const sc2 = screens(gfx).find((s) => s.some((x) => x[2] === "C µF"))!;
+    expect(value(sc2, "C µF")).toBeCloseTo(m.C!, 4);
     expect(value(sc2, "XC OHM")).toBeCloseTo(m.Xc!, 4);
   });
 
   test("POR ARMONICO lists the rms current of each harmonic", () => {
     const gfx = newGfx();
-    runBasic(POLIARM_LINES, [0, ...ARM_INPUTS, ...RAM_INPUTS], gfx, newMem(), [K.ARM, K.RAM, K.EACH, K.EXIT]);
+    runBasic(POLIARM_LINES, [...ARM_INPUTS, ...RAM_INPUTS], gfx, newMem(), [K.NEW, K.ARM, K.RAM, K.EACH, K.EXIT]);
     const sc = screens(gfx).find((s) => s.some((x) => x[0] === 5 && x[1] === 3))!;
     const m = poliarm(EXERCISE);
     m.Ih.forEach((v, k) => expect(sc.find((x) => x[0] === 5 && x[1] === k + 1)![2]).toBeCloseTo(v, 5));
@@ -134,9 +134,9 @@ describe("POLIARM listing run by the interpreter", () => {
 
   test("data persist: SEGUIR keeps them, NUEVO starts again; a peak / rms choice and the frequency are kept", () => {
     const mem = newMem();
-    runBasic(POLIARM_LINES, [0, ...ARM_INPUTS, ...RAM_INPUTS], newGfx(), mem, [K.ARM, K.RAM, K.EXIT]);
+    runBasic(POLIARM_LINES, [...ARM_INPUTS, ...RAM_INPUTS], newGfx(), mem, [K.NEW, K.ARM, K.RAM, K.EXIT]);
     const gfx = newGfx();
-    runBasic(POLIARM_LINES, [1], gfx, mem, [K.OPEN, K.EXIT]); // SEGUIR, then SIN COMPENSAR with the stored data
+    runBasic(POLIARM_LINES, [], gfx, mem, [K.KEEP, K.OPEN, K.EXIT]); // SEGUIR GUARDADOS, then SIN COMPENSAR with the stored data
     const sc = screens(gfx).find((s) => s.some((x) => x[2] === "I EF A"))!;
     expect(value(sc, "P W")).toBeCloseTo(poliarm(EXERCISE).P, 3);
   });
@@ -145,7 +145,7 @@ describe("POLIARM listing run by the interpreter", () => {
     for (const phi of [-720, -300, -30, 0, 45, 90, 179, 180, 270, 359, 720]) {
       const mem = newMem();
       // NUEVO, rms values, 50 Hz, 1 harmonic: h = 1, U = 1 V at 0°, I = 100 A at φ
-      runBasic(POLIARM_LINES, [0, 2, 50, 1, 1, 1, 0, 100, phi], newGfx(), mem, [K.ARM, K.EXIT]);
+      runBasic(POLIARM_LINES, [2, 50, 1, 1, 1, 0, 100, phi], newGfx(), mem, [K.NEW, K.ARM, K.EXIT]);
       expect(mem.L[4][1]).toBeCloseTo(100 * Math.cos((phi * Math.PI) / 180), 6);
       expect(mem.L[5][1]).toBeCloseTo(100 * Math.sin((phi * Math.PI) / 180), 6);
     }

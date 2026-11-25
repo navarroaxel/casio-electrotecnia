@@ -1,5 +1,28 @@
-"0=NUEVO 1=SEGUIR"?→A
-If A=0:Then
+1→S:1→Y
+ClrText
+Locate 1,1,"DATOS"
+Locate 3,2,"NUEVOS¹"
+Locate 3,3,"SEGUIR GUARDADOS²"
+While Y=1
+Locate 1,2," ":Locate 1,3," "
+Locate 1,S+1,">"
+While Getkey>0:WhileEnd
+0→W
+While W=0
+Getkey→W
+WhileEnd
+If W=28:Then S–1→S:IfEnd
+If W=37:Then S+1→S:IfEnd
+If S<1:Then 2→S:IfEnd
+If S>2:Then 1→S:IfEnd
+If W=31:Then 0→Y:IfEnd
+If W=72:Then 1→S:0→Y:IfEnd
+If W=62:Then 2→S:0→Y:IfEnd
+If W=71:Then 0→S:0→Y:IfEnd
+If W=47:Then 0→S:0→Y:IfEnd
+WhileEnd
+S→A
+If A=1:Then
 {0,0,0,0,0,0,0}→List 1
 {0,0,0,0,0,0,0}→List 2
 {0,0,0,0,0,0,0}→List 3
@@ -73,8 +96,28 @@ IfEnd
 B×3.14159265358979÷180→E
 E–6.28318530717959×Intg (E÷6.28318530717959+0.5)→E
 E×E→F
-1–F÷2×(1–F÷12×(1–F÷30×(1–F÷56×(1–F÷90×(1–F÷132×(1–F÷182×(1–F÷240×(1–F÷306×(1–F÷380×(1–F÷462))))))))))→C
-E×(1–F÷6×(1–F÷20×(1–F÷42×(1–F÷72×(1–F÷110×(1–F÷156×(1–F÷210×(1–F÷272×(1–F÷342×(1–F÷420))))))))))→D
+1–F÷462→C
+1–F÷380×C→C
+1–F÷306×C→C
+1–F÷240×C→C
+1–F÷182×C→C
+1–F÷132×C→C
+1–F÷90×C→C
+1–F÷56×C→C
+1–F÷30×C→C
+1–F÷12×C→C
+1–F÷2×C→C
+1–F÷420→D
+1–F÷342×D→D
+1–F÷272×D→D
+1–F÷210×D→D
+1–F÷156×D→D
+1–F÷110×D→D
+1–F÷72×D→D
+1–F÷42×D→D
+1–F÷20×D→D
+1–F÷6×D→D
+E×D→D
 A×G×C→List 2[K]:A×G×D→List 3[K]
 "I A (0 SI NO HAY)"?→A
 0→B
@@ -84,8 +127,28 @@ IfEnd
 B×3.14159265358979÷180→E
 E–6.28318530717959×Intg (E÷6.28318530717959+0.5)→E
 E×E→F
-1–F÷2×(1–F÷12×(1–F÷30×(1–F÷56×(1–F÷90×(1–F÷132×(1–F÷182×(1–F÷240×(1–F÷306×(1–F÷380×(1–F÷462))))))))))→C
-E×(1–F÷6×(1–F÷20×(1–F÷42×(1–F÷72×(1–F÷110×(1–F÷156×(1–F÷210×(1–F÷272×(1–F÷342×(1–F÷420))))))))))→D
+1–F÷462→C
+1–F÷380×C→C
+1–F÷306×C→C
+1–F÷240×C→C
+1–F÷182×C→C
+1–F÷132×C→C
+1–F÷90×C→C
+1–F÷56×C→C
+1–F÷30×C→C
+1–F÷12×C→C
+1–F÷2×C→C
+1–F÷420→D
+1–F÷342×D→D
+1–F÷272×D→D
+1–F÷210×D→D
+1–F÷156×D→D
+1–F÷110×D→D
+1–F÷72×D→D
+1–F÷42×D→D
+1–F÷20×D→D
+1–F÷6×D→D
+E×D→D
 A×G×C→List 4[K]:A×G×D→List 5[K]
 Next
 IfEnd
@@ -208,6 +271,7 @@ ClrText
 For 1→K To N
 Locate 1,K,List 1[K]:Locate 5,K,List 9[K]
 Next
+Locate 19,7,"EXE"
 While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 IfEnd
@@ -222,6 +286,7 @@ Locate 1,5,"D VAR":Locate 11,5,U
 If T>0:Then P÷T→W:IfEnd
 Locate 1,6,"FP":Locate 11,6,W
 Locate 1,7,"THD I %":Locate 11,7,X
+Locate 19,7,"EXE"
 While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 ClrText
@@ -229,9 +294,10 @@ Locate 1,1,"U EF V":Locate 11,1,√(M)
 Locate 1,2,"I FUND A":Locate 11,2,√(F)
 Locate 1,3,"THD U %":Locate 11,3,J
 If O=4:Then
-Locate 1,4,"C UF":Locate 11,4,List 9[20]
+Locate 1,4,"C µF":Locate 11,4,List 9[20]
 Locate 1,5,"XC OHM":Locate 11,5,V
 IfEnd
+Locate 19,7,"EXE"
 While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 IfEnd

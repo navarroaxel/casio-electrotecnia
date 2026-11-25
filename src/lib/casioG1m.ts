@@ -44,6 +44,9 @@ const SUPERSCRIPT: Record<string, number[]> = Object.fromEntries([..."⁰¹²³�
 // the "Mini Latin" letters of the fx-9860G (E7 followed by the ASCII code: E761-E77A small letters, E741-E75A capitals; EactMaker
 // uses them for subscripts): inside a string, the Unicode subscript letters write the subscripts of Mmax, Imin, Pmax…
 const MINI: Record<string, number> = { "ₐ": 0x61, "ₘ": 0x6d, "ₓ": 0x78, "ᵢ": 0x69, "ₙ": 0x6e };
+// the Greek small letter mu (Cahute's table: the small letters are E640-E658, mu = E64B), for "µF": the Unicode micro sign U+00B5
+// and the Greek mu U+03BC are both written as it. Same two-byte family as the superscripts above; not yet seen on a real calculator.
+const GREEK: Record<string, number[]> = { "µ": [0xe6, 0x4b], "μ": [0xe6, 0x4b] };
 const SYMBOLS: Record<string, number> = { "√": 0x86, "→": 0x0e, "◢": 0x0c, "≤": 0x10, "×": 0xa9, "÷": 0xb9 };
 // after one of these a minus is the sign of a number, not a subtraction
 const OPENS = new Set([0x0d, 0x3a, 0x28, 0x0e, 0x3d, 0x3e, 0x3c, 0x89, 0x99, 0xa9, 0xb9, 0x87, 0x2c, 0x5b, 0x7b]);
@@ -58,6 +61,11 @@ export function tokenizeLine(line: string): number[] {
       const o = ch.charCodeAt(0);
       if (ch in MINI) {
         out.push(0xe7, MINI[ch]);
+        i++;
+        continue;
+      }
+      if (ch in GREEK) {
+        out.push(...GREEK[ch]);
         i++;
         continue;
       }
