@@ -52,7 +52,8 @@ export function menuLines(o: {
   ];
 }
 
-export const PAUSE = ["While Getkey>0:WhileEnd", "While Getkey=0:WhileEnd"];
+// a result screen waits for a key; "EXE" in the corner of the last line (columns 19-21) says so
+export const PAUSE = ['Locate 19,7,"EXE"', "While Getkey>0:WhileEnd", "While Getkey=0:WhileEnd"];
 
 export const PI = "3.14159265358979";
 export const TWO_PI = "6.28318530717959";

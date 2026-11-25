@@ -248,6 +248,7 @@ ClrText
 For 1→K To N
 Locate 1,K,List 1[K]:Locate 5,K,List 9[K]
 Next
+Locate 19,7,"EXE"
 While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 IfEnd
@@ -262,6 +263,7 @@ Locate 1,5,"D VAR":Locate 11,5,U
 If T>0:Then P÷T→W:IfEnd
 Locate 1,6,"FP":Locate 11,6,W
 Locate 1,7,"THD I %":Locate 11,7,X
+Locate 19,7,"EXE"
 While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 ClrText
@@ -272,6 +274,7 @@ If O=4:Then
 Locate 1,4,"C UF":Locate 11,4,List 9[20]
 Locate 1,5,"XC OHM":Locate 11,5,V
 IfEnd
+Locate 19,7,"EXE"
 While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 IfEnd

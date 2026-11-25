@@ -64,7 +64,7 @@ Locate 1,1,"REFERENCIA:"
 Locate 1,2,"1 URN 2 USN 3 UTN"
 Locate 1,3,"4 URS 5 UST 6 UTR"
 Locate 1,4,"0 URN 220 V 90 GRAD"
-"NRO"?→R
+"REFERENCIA 0=DEFECTO"?→R
 0→Y
 If R=0:Then 1→R:220→A:90→B:1→Y:IfEnd
 If Y=0:Then
@@ -121,7 +121,7 @@ Locate 1,1,"CONEXION:"
 Locate 1,2,"1 ESTRELLA 4 HILOS"
 Locate 1,3,"2 ESTRELLA 3 HILOS"
 Locate 1,4,"3 TRIANGULO"
-"NRO"?→T
+"CONEXION 1 A 3"?→T
 If T<1:Then 1→T:IfEnd
 If T>3:Then 3→T:IfEnd
 T→List 10[1]
@@ -134,7 +134,7 @@ Locate 1,3,"2 S VA"
 Locate 1,4,"3 P W"
 Locate 1,5,"4 VARIAS P Y COS FI"
 Locate 1,6,"5 MOTOR Y CARGAS FASE"
-"NRO"?→V
+"CARGA POR 1 A 5"?→V
 If V<1:Then 1→V:IfEnd
 If V>5:Then 5→V:IfEnd
 If V=4:Then
@@ -149,7 +149,7 @@ ClrText
 Locate 1,1,"CARGA"
 Locate 7,1,K
 "P KW"?→A
-"COS FI NEG=CAP"?→B
+"COS FI NEG=CAPACIT"?→B
 A×1000→A
 Abs (B)→C
 If C>1:Then 1→C:IfEnd
@@ -169,6 +169,7 @@ Locate 1,3,"S VA"
 Locate 7,3,Intg (F×100+0.5)÷100
 Locate 1,4,"FP"
 Locate 7,4,Intg (H×100+0.5)÷100
+Locate 19,7,"EXE"
 While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 P÷3→P:Q÷3→Q
@@ -182,10 +183,12 @@ If V=5:Then
 0→S
 ClrText
 Locate 1,1,"MOTOR TRIFASICO"
-"P KW 0=NO"?→A
+Locate 1,2,"SE REPARTE POR IGUAL"
+Locate 1,3,"EN LAS 3 FASES"
+"P MOTOR 3F KW 0=NO"?→A
 A×1000÷3→P:0→Q
 If A>0:Then
-"COS FI NEG=CAP"?→B
+"COS FI NEG=CAPACIT"?→B
 Abs (B)→C
 If C>1:Then 1→C:IfEnd
 If C<0.001:Then 0.001→C:IfEnd
@@ -205,10 +208,22 @@ If K=1:Then Locate 1,1,"CARGA ENTRE R Y S":IfEnd
 If K=2:Then Locate 1,1,"CARGA ENTRE S Y T":IfEnd
 If K=3:Then Locate 1,1,"CARGA ENTRE T Y R":IfEnd
 IfEnd
-"P KW 0=NO"?→A
+Locate 1,2,"SOLO ESA FASE, SIN"
+Locate 1,3,"CONTAR EL MOTOR"
+If T<3:Then If K=1:Then "P FASE R KW 0=NO"?→A:IfEnd:IfEnd
+If T=3:Then If K=1:Then "P R Y S KW 0=NO"?→A:IfEnd:IfEnd
+If T<3:Then If K=2:Then "P FASE S KW 0=NO"?→A:IfEnd:IfEnd
+If T=3:Then If K=2:Then "P S Y T KW 0=NO"?→A:IfEnd:IfEnd
+If T<3:Then If K=3:Then "P FASE T KW 0=NO"?→A:IfEnd:IfEnd
+If T=3:Then If K=3:Then "P T Y R KW 0=NO"?→A:IfEnd:IfEnd
 P→G:Q→H
 If A>0:Then
-"COS FI NEG=CAP"?→B
+If T<3:Then If K=1:Then "COS FI R NEG=CAPACIT"?→B:IfEnd:IfEnd
+If T=3:Then If K=1:Then "COSFI RS NEG=CAPACIT"?→B:IfEnd:IfEnd
+If T<3:Then If K=2:Then "COS FI S NEG=CAPACIT"?→B:IfEnd:IfEnd
+If T=3:Then If K=2:Then "COSFI ST NEG=CAPACIT"?→B:IfEnd:IfEnd
+If T<3:Then If K=3:Then "COS FI T NEG=CAPACIT"?→B:IfEnd:IfEnd
+If T=3:Then If K=3:Then "COSFI TR NEG=CAPACIT"?→B:IfEnd:IfEnd
 A×1000→A
 Abs (B)→C
 If C>1:Then 1→C:IfEnd
@@ -426,6 +441,7 @@ Locate 1,6,"Q VAR"
 Locate 7,6,Intg (List 9[2]×100+0.5)÷100
 Locate 1,7,"S VA"
 Locate 7,7,Intg (List 9[3]×100+0.5)÷100
+Locate 19,7,"EXE"
 While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 If T>1:Then
@@ -436,6 +452,7 @@ For 1→J To 3
 Locate 5,J,Intg (List 23[J+4]×100+0.5)÷100
 Locate 13,J,Intg (List 24[J+4]×100+0.5)÷100
 Next
+Locate 19,7,"EXE"
 While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 IfEnd
@@ -453,6 +470,7 @@ Locate 5,J,Intg (List 25[J]×100+0.5)÷100
 Next
 Locate 1,7,"P W"
 Locate 7,7,Intg (List 9[1]×100+0.5)÷100
+Locate 19,7,"EXE"
 While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 For 1→K To 3
@@ -469,6 +487,7 @@ Locate 5,J+3,Intg (List 22[J]×100+0.5)÷100
 Next
 Locate 1,7,"P TOT"
 Locate 7,7,Intg (List 9[1]×100+0.5)÷100
+Locate 19,7,"EXE"
 While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 ClrText
@@ -479,6 +498,7 @@ Locate 5,J+3,Intg (List 24[J]×100+0.5)÷100
 Next
 Locate 1,7,"S TOT"
 Locate 7,7,Intg (List 9[3]×100+0.5)÷100
+Locate 19,7,"EXE"
 While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 IfEnd
@@ -488,7 +508,7 @@ Locate 1,1,"BANCO C EN TRIANGULO"
 Locate 1,2,"1 C CONOCIDO"
 Locate 1,3,"2 COS FI OBJETIVO"
 Locate 1,4,"3 QUITAR BANCO"
-"NRO"?→X
+"OPCION 1 A 3"?→X
 If X=3:Then 0→List 10[2]:IfEnd
 If X=1:Then
 ClrText
@@ -577,6 +597,7 @@ Locate 1,6,"S VA"
 Locate 7,6,Intg (S×100+0.5)÷100
 Locate 1,7,"FP"
 Locate 7,7,Intg (N×100+0.5)÷100
+Locate 19,7,"EXE"
 While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 ClrText
@@ -585,6 +606,7 @@ For 1→J To 3
 Locate 5,J,Intg (List 23[J+3]×100+0.5)÷100
 Locate 13,J,Intg (List 24[J+3]×100+0.5)÷100
 Next
+Locate 19,7,"EXE"
 While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 IfEnd
@@ -747,7 +769,7 @@ Locate 1,1,"VATIMETROS"
 Locate 1,2,"1 UN VAT. EQUILIB."
 Locate 1,3,"2 ARON EQUILIBRADA"
 Locate 1,4,"3 2 VAT. CARGA REAL"
-"NRO"?→X
+"OPCION 1 A 3"?→X
 If X=3:Then
 ClrText
 "COMUN 1R 2S 3T"?→C
@@ -766,6 +788,7 @@ Locate 1,3,"SUMA W"
 Locate 7,3,Intg ((P+Q)×100+0.5)÷100
 Locate 1,4,"P W"
 Locate 7,4,Intg (List 9[1]×100+0.5)÷100
+Locate 19,7,"EXE"
 While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 0→X
@@ -835,6 +858,7 @@ Locate 1,4,"FP"
 Locate 7,4,Intg (N×100+0.5)÷100
 Locate 1,5,"FI GRADOS"
 Locate 7,5,Intg (M×100+0.5)÷100
+Locate 19,7,"EXE"
 While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 IfEnd

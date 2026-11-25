@@ -29,14 +29,14 @@ ClrText
 Locate 1,1,"ARMONICA"
 Locate 10,1,K
 "ORDEN"?→A
-"U"?→J
+"U V"?→J
 J×W→J
 "U ANGULO GRADOS"?→B
 0→S
 If Abs (A÷3–Intg (A÷3+0.5))<0.001:Then 1→S:IfEnd
 0→I
 If T=1:Then
-"I"?→I
+"I A"?→I
 I×W→I
 "I ANGULO GRADOS"?→Y
 B–Y→B
@@ -106,6 +106,7 @@ Locate 1,6,"D VA"
 Locate 10,6,Intg (D×100+0.5)÷100
 Locate 1,7,"FP"
 Locate 10,7,Intg (F×100+0.5)÷100
+Locate 19,7,"EXE"
 While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 ClrText
@@ -113,6 +114,7 @@ For 1→K To N
 Locate 1,K,Intg (List 2[K]×100+0.5)÷100
 Locate 6,K,Intg (List 1[K]×100+0.5)÷100
 Next
+Locate 19,7,"EXE"
 While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 IfEnd
@@ -135,7 +137,7 @@ Locate 10,1,K
 If J=1:Then Locate 1,2,"FASE R":IfEnd
 If J=2:Then Locate 1,2,"FASE S":IfEnd
 If J=3:Then Locate 1,2,"FASE T":IfEnd
-"I"?→A
+"I A"?→A
 A×W→A
 "I ANGULO GRADOS"?→B
 B×3.14159265358979÷180→E
@@ -184,6 +186,7 @@ Locate 1,4,"I NEUTRO"
 Locate 10,4,Intg (M×100+0.5)÷100
 Locate 1,5,"MAS CARGADA"
 Locate 13,5,Intg (F×100+0.5)÷100
+Locate 19,7,"EXE"
 While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 IfEnd
