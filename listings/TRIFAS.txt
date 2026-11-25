@@ -195,7 +195,7 @@ Locate 1,1,"CONEXION (4 = VER)"
 Locate 3,2,"ESTRELLA 4 HILOS¹"
 Locate 3,3,"ESTRELLA 3 HILOS²"
 Locate 3,4,"TRIANGULO³"
-Locate 3,5,"VER LA GUARDADA⁴"
+Locate 3,5,"VER⁴"
 While Y=1
 Locate 1,2," ":Locate 1,3," ":Locate 1,4," ":Locate 1,5," "
 Locate 1,S+1,">"

@@ -612,7 +612,7 @@ describe("CARGA 5 (motor + loads on each phase) and the per-phase pages of RESOL
   });
 });
 
-describe("CARGA 4: VER LA GUARDADA shows the stored load without asking or changing anything", () => {
+describe("CARGA 4: VER shows the stored load without asking or changing anything", () => {
   const rowOf = (g: ReturnType<typeof newGfx>, label: string) => {
     for (const sc of [...g.screens].reverse()) {
       const l = sc.find((x) => x[2] === label && x[0] === 1);
@@ -656,6 +656,6 @@ describe("CARGA 4: VER LA GUARDADA shows the stored load without asking or chang
   test("it is the fourth item of the first CARGA menu", () => {
     const g = go(TRIFAS_LINES, flow(nuevo(), tens(), verCarga(), exit()));
     const sc = g.screens.find((s) => s.some((x) => x[2] === "CONEXION (4 = VER)"))!;
-    expect(sc.filter((x) => x[0] === 3).map((x) => x[2])).toEqual(["ESTRELLA 4 HILOS¹", "ESTRELLA 3 HILOS²", "TRIANGULO³", "VER LA GUARDADA⁴"]);
+    expect(sc.filter((x) => x[0] === 3).map((x) => x[2])).toEqual(["ESTRELLA 4 HILOS¹", "ESTRELLA 3 HILOS²", "TRIANGULO³", "VER⁴"]);
   });
 });
