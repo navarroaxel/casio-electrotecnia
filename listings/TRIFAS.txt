@@ -10,18 +10,29 @@ If A=0:Then
 {0,0,0}→List 8
 {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}→List 9
 {1,0,0,0,0,0,0,0,0,0}→List 10
+{0,0,0}→List 15
+{0,0,0}→List 16
+{0,0,0}→List 17
+{0,0,0}→List 18
+{0,0,0}→List 19
+{0,0,0}→List 20
 IfEnd
+{0,0,0,0,0,0,0,0}→List 21
+{0,0,0,0,0,0,0,0}→List 22
+{0,0,0,0,0,0,0,0}→List 23
+{0,0,0,0,0,0,0,0}→List 24
 While 1=1
 1→R:1→Y
 ClrText
 Locate 3,1,"TENSIONES¹"
 Locate 3,2,"CARGA²"
 Locate 3,3,"RESOLVER³"
-Locate 3,4,"MEDICION BALANC.⁴"
-Locate 3,5,"BORRAR TODO⁵"
-Locate 3,6,"SALIR⁰"
+Locate 3,4,"BANCO C⁴"
+Locate 3,5,"FASORIAL⁵"
+Locate 3,6,"VATIMETROS⁶"
+Locate 3,7,"BORRAR TODO⁷"
 While Y=1
-Locate 1,1," ":Locate 1,2," ":Locate 1,3," ":Locate 1,4," ":Locate 1,5," ":Locate 1,6," "
+Locate 1,1," ":Locate 1,2," ":Locate 1,3," ":Locate 1,4," ":Locate 1,5," ":Locate 1,6," ":Locate 1,7," "
 Locate 1,R+0,">"
 While Getkey>0:WhileEnd
 0→W
@@ -30,19 +41,20 @@ Getkey→W
 WhileEnd
 If W=28:Then R–1→R:IfEnd
 If W=37:Then R+1→R:IfEnd
-If R<1:Then 6→R:IfEnd
-If R>6:Then 1→R:IfEnd
+If R<1:Then 7→R:IfEnd
+If R>7:Then 1→R:IfEnd
 If W=31:Then 0→Y:IfEnd
 If W=72:Then 1→R:0→Y:IfEnd
 If W=62:Then 2→R:0→Y:IfEnd
 If W=52:Then 3→R:0→Y:IfEnd
 If W=73:Then 4→R:0→Y:IfEnd
 If W=63:Then 5→R:0→Y:IfEnd
-If W=71:Then 6→R:0→Y:IfEnd
-If W=47:Then 6→R:0→Y:IfEnd
+If W=53:Then 6→R:0→Y:IfEnd
+If W=74:Then 7→R:0→Y:IfEnd
+If W=71:Then 0→R:0→Y:IfEnd
+If W=47:Then 0→R:0→Y:IfEnd
 WhileEnd
 R→O
-If R=6:Then 0→O:IfEnd
 If O=0:Then Stop:IfEnd
 If O=1:Then
 ClrText
@@ -109,31 +121,10 @@ E×(1–F÷6×(1–F÷20×(1–F÷42×(1–F÷72×(1–F÷110×(1–F÷156×(1�
 A×C→List 3[K]:A×D→List 4[K]
 Next
 IfEnd
-If O=5:Then
-1→S:1→T
+If O=7:Then
 ClrText
 Locate 1,1,"BORRAR TODO?"
-Locate 3,2,"NO¹"
-Locate 3,3,"SI, BORRAR²"
-While T=1
-Locate 1,2," ":Locate 1,3," "
-Locate 1,S+1,">"
-While Getkey>0:WhileEnd
-0→M
-While M=0
-Getkey→M
-WhileEnd
-If M=28:Then S–1→S:IfEnd
-If M=37:Then S+1→S:IfEnd
-If S<1:Then 2→S:IfEnd
-If S>2:Then 1→S:IfEnd
-If M=31:Then 0→T:IfEnd
-If M=72:Then 1→S:0→T:IfEnd
-If M=62:Then 2→S:0→T:IfEnd
-If M=71:Then 1→S:0→T:IfEnd
-If M=47:Then 1→S:0→T:IfEnd
-WhileEnd
-S→X
+"1=NO 2=SI"?→X
 If X=2:Then
 {0,0,0}→List 1
 {0,0,0}→List 2
@@ -145,6 +136,12 @@ If X=2:Then
 {0,0,0}→List 8
 {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}→List 9
 {1,0,0,0,0,0,0,0,0,0}→List 10
+{0,0,0}→List 15
+{0,0,0}→List 16
+{0,0,0}→List 17
+{0,0,0}→List 18
+{0,0,0}→List 19
+{0,0,0}→List 20
 IfEnd
 IfEnd
 If O=3:Then
@@ -196,105 +193,57 @@ P+A×C+B×D→P
 Q+B×C–A×D→Q
 Next
 P→List 9[1]:Q→List 9[2]:√(P×P+Q×Q)→List 9[3]
+For 1→K To 3
+K+1→J:If J>3:Then 1→J:IfEnd
+List 1[K]–List 1[J]→A:List 2[K]–List 2[J]→B
+–List 10[4]×List 10[3]×B→List 19[K]:List 10[4]×List 10[3]×A→List 20[K]
+Next
+For 1→K To 3
+K–1→J:If J<1:Then 3→J:IfEnd
+0→List 15[K]:0→List 16[K]
+If List 10[2]=1:Then
+List 19[K]–List 19[J]→List 15[K]:List 20[K]–List 20[J]→List 16[K]
+IfEnd
+List 5[K]+List 15[K]→List 17[K]:List 6[K]+List 16[K]→List 18[K]
+Next
+List 5[1]→List 21[1]:List 6[1]→List 22[1]
+List 5[2]→List 21[2]:List 6[2]→List 22[2]
+List 5[3]→List 21[3]:List 6[3]→List 22[3]
+List 9[4]→List 21[4]:List 9[5]→List 22[4]
+For 1→K To 3
+If T=2:Then List 7[K]→List 21[K+4]:List 8[K]→List 22[K+4]:IfEnd
+If T=3:Then List 9[8+2×K]→List 21[K+4]:List 9[9+2×K]→List 22[K+4]:IfEnd
+Next
+For 1→J To 7
+List 21[J]→C:List 22[J]→D
+√(C×C+D×D)→X
+0→Y
+If X>0:Then
+Abs (D)→E:Abs (C)→F
+If E>F:Then E→G:F→E:G→F:IfEnd
+E÷F→G
+G÷(1+√(1+G×G))→G
+G÷(1+√(1+G×G))→G
+G×G→H
+G×(1–H×(1÷3–H×(1÷5–H×(1÷7–H×(1÷9–H×(1÷11–H×(1÷13–H×(1÷15))))))))×4→G
+If Abs (D)>Abs (C):Then 1.5707963267949–G→G:IfEnd
+If C<0:Then 3.14159265358979–G→G:IfEnd
+If D<0:Then –G→G:IfEnd
+G×180÷3.14159265358979→Y
+IfEnd
+X→List 23[J]:Y→List 24[J]
+Next
 ClrText
-List 5[1]→C:List 6[1]→D
-√(C×C+D×D)→X
-0→Y
-If X>0:Then
-Abs (D)→E:Abs (C)→F
-If E>F:Then E→G:F→E:G→F:IfEnd
-E÷F→G
-G÷(1+√(1+G×G))→G
-G÷(1+√(1+G×G))→G
-G×G→H
-G×(1–H×(1÷3–H×(1÷5–H×(1÷7–H×(1÷9–H×(1÷11–H×(1÷13–H×(1÷15))))))))×4→G
-If Abs (D)>Abs (C):Then 1.5707963267949–G→G:IfEnd
-If C<0:Then 3.14159265358979–G→G:IfEnd
-If D<0:Then –G→G:IfEnd
-G×180÷3.14159265358979→Y
-IfEnd
-Locate 1,1,"IR"
-Locate 4,1,Intg (X×100+0.5)÷100
-Locate 13,1,Intg (Y×100+0.5)÷100
-List 5[2]→C:List 6[2]→D
-√(C×C+D×D)→X
-0→Y
-If X>0:Then
-Abs (D)→E:Abs (C)→F
-If E>F:Then E→G:F→E:G→F:IfEnd
-E÷F→G
-G÷(1+√(1+G×G))→G
-G÷(1+√(1+G×G))→G
-G×G→H
-G×(1–H×(1÷3–H×(1÷5–H×(1÷7–H×(1÷9–H×(1÷11–H×(1÷13–H×(1÷15))))))))×4→G
-If Abs (D)>Abs (C):Then 1.5707963267949–G→G:IfEnd
-If C<0:Then 3.14159265358979–G→G:IfEnd
-If D<0:Then –G→G:IfEnd
-G×180÷3.14159265358979→Y
-IfEnd
-Locate 1,2,"IS"
-Locate 4,2,Intg (X×100+0.5)÷100
-Locate 13,2,Intg (Y×100+0.5)÷100
-List 5[3]→C:List 6[3]→D
-√(C×C+D×D)→X
-0→Y
-If X>0:Then
-Abs (D)→E:Abs (C)→F
-If E>F:Then E→G:F→E:G→F:IfEnd
-E÷F→G
-G÷(1+√(1+G×G))→G
-G÷(1+√(1+G×G))→G
-G×G→H
-G×(1–H×(1÷3–H×(1÷5–H×(1÷7–H×(1÷9–H×(1÷11–H×(1÷13–H×(1÷15))))))))×4→G
-If Abs (D)>Abs (C):Then 1.5707963267949–G→G:IfEnd
-If C<0:Then 3.14159265358979–G→G:IfEnd
-If D<0:Then –G→G:IfEnd
-G×180÷3.14159265358979→Y
-IfEnd
-Locate 1,3,"IT"
-Locate 4,3,Intg (X×100+0.5)÷100
-Locate 13,3,Intg (Y×100+0.5)÷100
-If T=1:Then
-List 9[4]→C:List 9[5]→D
-√(C×C+D×D)→X
-0→Y
-If X>0:Then
-Abs (D)→E:Abs (C)→F
-If E>F:Then E→G:F→E:G→F:IfEnd
-E÷F→G
-G÷(1+√(1+G×G))→G
-G÷(1+√(1+G×G))→G
-G×G→H
-G×(1–H×(1÷3–H×(1÷5–H×(1÷7–H×(1÷9–H×(1÷11–H×(1÷13–H×(1÷15))))))))×4→G
-If Abs (D)>Abs (C):Then 1.5707963267949–G→G:IfEnd
-If C<0:Then 3.14159265358979–G→G:IfEnd
-If D<0:Then –G→G:IfEnd
-G×180÷3.14159265358979→Y
-IfEnd
-Locate 1,4,"IN"
-Locate 4,4,Intg (X×100+0.5)÷100
-Locate 13,4,Intg (Y×100+0.5)÷100
-IfEnd
-If T=2:Then
-List 9[4]→C:List 9[5]→D
-√(C×C+D×D)→X
-0→Y
-If X>0:Then
-Abs (D)→E:Abs (C)→F
-If E>F:Then E→G:F→E:G→F:IfEnd
-E÷F→G
-G÷(1+√(1+G×G))→G
-G÷(1+√(1+G×G))→G
-G×G→H
-G×(1–H×(1÷3–H×(1÷5–H×(1÷7–H×(1÷9–H×(1÷11–H×(1÷13–H×(1÷15))))))))×4→G
-If Abs (D)>Abs (C):Then 1.5707963267949–G→G:IfEnd
-If C<0:Then 3.14159265358979–G→G:IfEnd
-If D<0:Then –G→G:IfEnd
-G×180÷3.14159265358979→Y
-IfEnd
-Locate 1,4,"UNN"
-Locate 4,4,Intg (X×100+0.5)÷100
-Locate 13,4,Intg (Y×100+0.5)÷100
+Locate 1,1,"IR":Locate 1,2,"IS":Locate 1,3,"IT"
+For 1→J To 3
+Locate 4,J,Intg (List 23[J]×100+0.5)÷100
+Locate 13,J,Intg (List 24[J]×100+0.5)÷100
+Next
+If T=1:Then Locate 1,4,"IN":IfEnd
+If T=2:Then Locate 1,4,"UNN":IfEnd
+If T<3:Then
+Locate 4,4,Intg (List 23[4]×100+0.5)÷100
+Locate 13,4,Intg (List 24[4]×100+0.5)÷100
 IfEnd
 Locate 1,5,"P W"
 Locate 7,5,Intg (List 9[1]×100+0.5)÷100
@@ -306,153 +255,267 @@ While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 If T>1:Then
 ClrText
-If T=2:Then
-List 7[1]→C:List 8[1]→D
-√(C×C+D×D)→X
-0→Y
-If X>0:Then
-Abs (D)→E:Abs (C)→F
-If E>F:Then E→G:F→E:G→F:IfEnd
-E÷F→G
-G÷(1+√(1+G×G))→G
-G÷(1+√(1+G×G))→G
-G×G→H
-G×(1–H×(1÷3–H×(1÷5–H×(1÷7–H×(1÷9–H×(1÷11–H×(1÷13–H×(1÷15))))))))×4→G
-If Abs (D)>Abs (C):Then 1.5707963267949–G→G:IfEnd
-If C<0:Then 3.14159265358979–G→G:IfEnd
-If D<0:Then –G→G:IfEnd
-G×180÷3.14159265358979→Y
-IfEnd
-Locate 1,1,"UR"
-Locate 4,1,Intg (X×100+0.5)÷100
-Locate 13,1,Intg (Y×100+0.5)÷100
-List 7[2]→C:List 8[2]→D
-√(C×C+D×D)→X
-0→Y
-If X>0:Then
-Abs (D)→E:Abs (C)→F
-If E>F:Then E→G:F→E:G→F:IfEnd
-E÷F→G
-G÷(1+√(1+G×G))→G
-G÷(1+√(1+G×G))→G
-G×G→H
-G×(1–H×(1÷3–H×(1÷5–H×(1÷7–H×(1÷9–H×(1÷11–H×(1÷13–H×(1÷15))))))))×4→G
-If Abs (D)>Abs (C):Then 1.5707963267949–G→G:IfEnd
-If C<0:Then 3.14159265358979–G→G:IfEnd
-If D<0:Then –G→G:IfEnd
-G×180÷3.14159265358979→Y
-IfEnd
-Locate 1,2,"US"
-Locate 4,2,Intg (X×100+0.5)÷100
-Locate 13,2,Intg (Y×100+0.5)÷100
-List 7[3]→C:List 8[3]→D
-√(C×C+D×D)→X
-0→Y
-If X>0:Then
-Abs (D)→E:Abs (C)→F
-If E>F:Then E→G:F→E:G→F:IfEnd
-E÷F→G
-G÷(1+√(1+G×G))→G
-G÷(1+√(1+G×G))→G
-G×G→H
-G×(1–H×(1÷3–H×(1÷5–H×(1÷7–H×(1÷9–H×(1÷11–H×(1÷13–H×(1÷15))))))))×4→G
-If Abs (D)>Abs (C):Then 1.5707963267949–G→G:IfEnd
-If C<0:Then 3.14159265358979–G→G:IfEnd
-If D<0:Then –G→G:IfEnd
-G×180÷3.14159265358979→Y
-IfEnd
-Locate 1,3,"UT"
-Locate 4,3,Intg (X×100+0.5)÷100
-Locate 13,3,Intg (Y×100+0.5)÷100
-IfEnd
-If T=3:Then
-List 9[10]→C:List 9[11]→D
-√(C×C+D×D)→X
-0→Y
-If X>0:Then
-Abs (D)→E:Abs (C)→F
-If E>F:Then E→G:F→E:G→F:IfEnd
-E÷F→G
-G÷(1+√(1+G×G))→G
-G÷(1+√(1+G×G))→G
-G×G→H
-G×(1–H×(1÷3–H×(1÷5–H×(1÷7–H×(1÷9–H×(1÷11–H×(1÷13–H×(1÷15))))))))×4→G
-If Abs (D)>Abs (C):Then 1.5707963267949–G→G:IfEnd
-If C<0:Then 3.14159265358979–G→G:IfEnd
-If D<0:Then –G→G:IfEnd
-G×180÷3.14159265358979→Y
-IfEnd
-Locate 1,1,"IRS"
-Locate 4,1,Intg (X×100+0.5)÷100
-Locate 13,1,Intg (Y×100+0.5)÷100
-List 9[12]→C:List 9[13]→D
-√(C×C+D×D)→X
-0→Y
-If X>0:Then
-Abs (D)→E:Abs (C)→F
-If E>F:Then E→G:F→E:G→F:IfEnd
-E÷F→G
-G÷(1+√(1+G×G))→G
-G÷(1+√(1+G×G))→G
-G×G→H
-G×(1–H×(1÷3–H×(1÷5–H×(1÷7–H×(1÷9–H×(1÷11–H×(1÷13–H×(1÷15))))))))×4→G
-If Abs (D)>Abs (C):Then 1.5707963267949–G→G:IfEnd
-If C<0:Then 3.14159265358979–G→G:IfEnd
-If D<0:Then –G→G:IfEnd
-G×180÷3.14159265358979→Y
-IfEnd
-Locate 1,2,"IST"
-Locate 4,2,Intg (X×100+0.5)÷100
-Locate 13,2,Intg (Y×100+0.5)÷100
-List 9[14]→C:List 9[15]→D
-√(C×C+D×D)→X
-0→Y
-If X>0:Then
-Abs (D)→E:Abs (C)→F
-If E>F:Then E→G:F→E:G→F:IfEnd
-E÷F→G
-G÷(1+√(1+G×G))→G
-G÷(1+√(1+G×G))→G
-G×G→H
-G×(1–H×(1÷3–H×(1÷5–H×(1÷7–H×(1÷9–H×(1÷11–H×(1÷13–H×(1÷15))))))))×4→G
-If Abs (D)>Abs (C):Then 1.5707963267949–G→G:IfEnd
-If C<0:Then 3.14159265358979–G→G:IfEnd
-If D<0:Then –G→G:IfEnd
-G×180÷3.14159265358979→Y
-IfEnd
-Locate 1,3,"ITR"
-Locate 4,3,Intg (X×100+0.5)÷100
-Locate 13,3,Intg (Y×100+0.5)÷100
-IfEnd
+If T=2:Then Locate 1,1,"UR":Locate 1,2,"US":Locate 1,3,"UT":IfEnd
+If T=3:Then Locate 1,1,"IRS":Locate 1,2,"IST":Locate 1,3,"ITR":IfEnd
+For 1→J To 3
+Locate 4,J,Intg (List 23[J+4]×100+0.5)÷100
+Locate 13,J,Intg (List 24[J+4]×100+0.5)÷100
+Next
 While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 IfEnd
 IfEnd
 If O=4:Then
-1→S:1→T
 ClrText
-Locate 1,1,"MEDICION BALANCEADA"
-Locate 3,2,"UN VATIMETRO¹"
-Locate 3,3,"ARON 2 VATIMETROS²"
-While T=1
-Locate 1,2," ":Locate 1,3," "
-Locate 1,S+1,">"
+Locate 1,1,"BANCO C EN TRIANGULO"
+Locate 1,2,"1 C CONOCIDO"
+Locate 1,3,"2 COS FI OBJETIVO"
+Locate 1,4,"3 QUITAR BANCO"
+"NRO"?→X
+If X=3:Then 0→List 10[2]:IfEnd
+If X=1:Then
+ClrText
+"F HZ"?→F
+"C MICROF"?→C
+1→List 10[2]
+2×3.14159265358979×F→List 10[4]
+C÷1000000→List 10[3]
+IfEnd
+If X=2:Then
+ClrText
+"F HZ"?→F
+"COS FI OBJETIVO"?→C
+If C>1:Then 1→C:IfEnd
+If C<0.001:Then 0.001→C:IfEnd
+List 1[1]–List 1[2]→A:List 2[1]–List 2[2]→B:A×A+B×B→D
+√(1–C×C)÷C→E
+List 9[2]–List 9[1]×E→G
+If G<0:Then 0→G:IfEnd
+1→List 10[2]
+2×3.14159265358979×F→List 10[4]
+0→List 10[3]
+If D>0:Then G÷(3×List 10[4]×D)→List 10[3]:IfEnd
+IfEnd
+If X>0:Then
+If X<3:Then
+For 1→K To 3
+K+1→J:If J>3:Then 1→J:IfEnd
+List 1[K]–List 1[J]→A:List 2[K]–List 2[J]→B
+–List 10[4]×List 10[3]×B→List 19[K]:List 10[4]×List 10[3]×A→List 20[K]
+Next
+For 1→K To 3
+K–1→J:If J<1:Then 3→J:IfEnd
+0→List 15[K]:0→List 16[K]
+If List 10[2]=1:Then
+List 19[K]–List 19[J]→List 15[K]:List 20[K]–List 20[J]→List 16[K]
+IfEnd
+List 5[K]+List 15[K]→List 17[K]:List 6[K]+List 16[K]→List 18[K]
+Next
+List 1[1]–List 1[2]→A:List 2[1]–List 2[2]→B
+List 9[2]–3×List 10[4]×List 10[3]×(A×A+B×B)→Q
+List 9[1]→P:√(P×P+Q×Q)→S
+0→N:If S>0:Then P÷S→N:IfEnd
+For 1→K To 3
+List 17[K]→List 21[K]:List 18[K]→List 22[K]:List 15[K]→List 21[K+3]:List 16[K]→List 22[K+3]
+Next
+For 1→J To 6
+List 21[J]→C:List 22[J]→D
+√(C×C+D×D)→X
+0→Y
+If X>0:Then
+Abs (D)→E:Abs (C)→F
+If E>F:Then E→G:F→E:G→F:IfEnd
+E÷F→G
+G÷(1+√(1+G×G))→G
+G÷(1+√(1+G×G))→G
+G×G→H
+G×(1–H×(1÷3–H×(1÷5–H×(1÷7–H×(1÷9–H×(1÷11–H×(1÷13–H×(1÷15))))))))×4→G
+If Abs (D)>Abs (C):Then 1.5707963267949–G→G:IfEnd
+If C<0:Then 3.14159265358979–G→G:IfEnd
+If D<0:Then –G→G:IfEnd
+G×180÷3.14159265358979→Y
+IfEnd
+X→List 23[J]:Y→List 24[J]
+Next
+ClrText
+Locate 1,1,"ILR":Locate 1,2,"ILS":Locate 1,3,"ILT"
+For 1→J To 3
+Locate 4,J,Intg (List 23[J]×100+0.5)÷100
+Locate 13,J,Intg (List 24[J]×100+0.5)÷100
+Next
+Locate 1,4,"C UF"
+Locate 7,4,Intg (List 10[3]×1000000×100+0.5)÷100
+Locate 1,5,"Q VAR"
+Locate 7,5,Intg (Q×100+0.5)÷100
+Locate 1,6,"S VA"
+Locate 7,6,Intg (S×100+0.5)÷100
+Locate 1,7,"FP"
+Locate 7,7,Intg (N×100+0.5)÷100
 While Getkey>0:WhileEnd
+While Getkey=0:WhileEnd
+ClrText
+Locate 1,1,"IRC":Locate 1,2,"ISC":Locate 1,3,"ITC"
+For 1→J To 3
+Locate 4,J,Intg (List 23[J+3]×100+0.5)÷100
+Locate 13,J,Intg (List 24[J+3]×100+0.5)÷100
+Next
+While Getkey>0:WhileEnd
+While Getkey=0:WhileEnd
+IfEnd
+IfEnd
+IfEnd
+If O=5:Then
+List 10[1]→T
+{0,0,0,0,0,0,0,0,0}→List 11
+{0,0,0,0,0,0,0,0,0}→List 12
+{0,0,0,0,0,0,0,0,0}→List 13
+{0,0,0,0,0,0,0,0,0}→List 14
+2→U:If List 10[2]=1:Then 3→U:IfEnd
+For 1→Z To U
+3→N
+If Z=1:Then
+For 1→K To 3
+0→List 11[K]:0→List 12[K]:List 1[K]→List 13[K]:List 2[K]→List 14[K]
+Next
+If T=2:Then 6→N
+For 1→K To 3
+List 9[4]→List 11[K+3]:List 9[5]→List 12[K+3]:List 1[K]→List 13[K+3]:List 2[K]→List 14[K+3]
+Next
+IfEnd
+IfEnd
+If Z=2:Then
+For 1→K To 3
+0→List 11[K]:0→List 12[K]:List 5[K]→List 13[K]:List 6[K]→List 14[K]
+Next
+If T=1:Then 4→N
+0→List 11[4]:0→List 12[4]:List 9[4]→List 13[4]:List 9[5]→List 14[4]
+IfEnd
+If T=3:Then 6→N
+For 1→K To 3
+0→List 11[K+3]:0→List 12[K+3]:List 9[8+2×K]→List 13[K+3]:List 9[9+2×K]→List 14[K+3]
+Next
+IfEnd
+IfEnd
+If Z=3:Then
+9→N
+For 1→K To 3
+0→List 11[K]:0→List 12[K]:List 5[K]→List 13[K]:List 6[K]→List 14[K]
+Next
+For 1→K To 3
+List 5[K]→List 11[K+3]:List 6[K]→List 12[K+3]:List 17[K]→List 13[K+3]:List 18[K]→List 14[K+3]
+Next
+For 1→K To 3
+0→List 11[K+6]:0→List 12[K+6]:List 17[K]→List 13[K+6]:List 18[K]→List 14[K+6]
+Next
+IfEnd
 0→M
-While M=0
-Getkey→M
-WhileEnd
-If M=28:Then S–1→S:IfEnd
-If M=37:Then S+1→S:IfEnd
-If S<1:Then 2→S:IfEnd
-If S>2:Then 1→S:IfEnd
-If M=31:Then 0→T:IfEnd
-If M=72:Then 1→S:0→T:IfEnd
-If M=62:Then 2→S:0→T:IfEnd
-If M=71:Then 0→S:0→T:IfEnd
-If M=47:Then 0→S:0→T:IfEnd
-WhileEnd
-S→X
+For 1→K To N
+√(List 13[K]×List 13[K]+List 14[K]×List 14[K])→D
+If D>M:Then D→M:IfEnd
+√(List 11[K]×List 11[K]+List 12[K]×List 12[K])→D
+If D>M:Then D→M:IfEnd
+Next
+If M=0:Then 1→M:IfEnd
+1.25×M→W
+Cls
+ViewWindow –2×W,2×W,1,–W,W,1
+For 1→K To N
+List 11[K]→A:List 12[K]→B:List 13[K]→X:List 14[K]→Y
+F-Line A,B,X,Y
+X–A→C:Y–B→D:√(C×C+D×D)→E
+If E>0:Then
+0.1×W÷E→E
+C×E→C:D×E→D
+F-Line X,Y,X–(C×0.9063–D×0.4226),Y–(C×0.4226+D×0.9063)
+F-Line X,Y,X–(C×0.9063+D×0.4226),Y–(D×0.9063–C×0.4226)
+X+2.2×C→G:Y+2.2×D→H
+If Z=3:Then If K>3:Then If K<7:Then (A+X)÷2→G:(B+Y)÷2→H:IfEnd:IfEnd:IfEnd
+Intg ((W–H)÷(2×W)×63)–2→R
+If R<1:Then 1→R:IfEnd
+If R>57:Then 57→R:IfEnd
+Intg ((G+2×W)÷(4×W)×127)–2→C
+If C<1:Then 1→C:IfEnd
+If C>115:Then 115→C:IfEnd
+If Z=1:Then
+If K=1:Then Text R,C,"R":IfEnd
+If K=2:Then Text R,C,"S":IfEnd
+If K=3:Then Text R,C,"T":IfEnd
+IfEnd
+If Z=2:Then
+If K=1:Then Text R,C,"IR":IfEnd
+If K=2:Then Text R,C,"IS":IfEnd
+If K=3:Then Text R,C,"IT":IfEnd
+If T=1:Then If K=4:Then Text R,C,"IN":IfEnd:IfEnd
+If T=3:Then If K=4:Then Text R,C,"RS":IfEnd:IfEnd
+If T=3:Then If K=5:Then Text R,C,"ST":IfEnd:IfEnd
+If T=3:Then If K=6:Then Text R,C,"TR":IfEnd:IfEnd
+IfEnd
+If Z=3:Then
+If K=1:Then Text R,C,"IR":IfEnd
+If K=2:Then Text R,C,"IS":IfEnd
+If K=3:Then Text R,C,"IT":IfEnd
+If K=4:Then Text R,C,"IRC":IfEnd
+If K=5:Then Text R,C,"ISC":IfEnd
+If K=6:Then Text R,C,"ITC":IfEnd
+If K=7:Then Text R,C,"ILR":IfEnd
+If K=8:Then Text R,C,"ILS":IfEnd
+If K=9:Then Text R,C,"ILT":IfEnd
+IfEnd
+IfEnd
+Next
+PlotOn 0,0
+Text 33,66,"O"
+If Z=1:Then
+F-Line List 1[1],List 2[1],List 1[2],List 2[2]
+F-Line List 1[2],List 2[2],List 1[3],List 2[3]
+F-Line List 1[3],List 2[3],List 1[1],List 2[1]
+If T=2:Then
+PlotOn List 9[4],List 9[5]
+Intg ((W–(List 9[5]–0.08×W))÷(2×W)×63)–2→R
+If R<1:Then 1→R:IfEnd
+If R>57:Then 57→R:IfEnd
+Intg (((List 9[4]+0.08×W)+2×W)÷(4×W)×127)–2→C
+If C<1:Then 1→C:IfEnd
+If C>115:Then 115→C:IfEnd
+Text R,C,"N"
+IfEnd
+Text 57,1,"U MAX"
+IfEnd
+If Z>1:Then Text 57,1,"I MAX":IfEnd
+Text 57,30,Intg (M×10+0.5)÷10
+While Getkey>0:WhileEnd
+While Getkey=0:WhileEnd
+Next
+IfEnd
+If O=6:Then
+ClrText
+Locate 1,1,"VATIMETROS"
+Locate 1,2,"1 UN VAT. EQUILIB."
+Locate 1,3,"2 ARON EQUILIBRADA"
+Locate 1,4,"3 2 VAT. CARGA REAL"
+"NRO"?→X
+If X=3:Then
+ClrText
+"COMUN 1R 2S 3T"?→C
+If C=1:Then 2→A:3→B:IfEnd
+If C=2:Then 1→A:3→B:IfEnd
+If C=3:Then 1→A:2→B:IfEnd
+(List 1[A]–List 1[C])×List 17[A]+(List 2[A]–List 2[C])×List 18[A]→P
+(List 1[B]–List 1[C])×List 17[B]+(List 2[B]–List 2[C])×List 18[B]→Q
+ClrText
+If C=1:Then Locate 1,1,"WSR":Locate 1,2,"WTR":IfEnd
+If C=2:Then Locate 1,1,"WRS":Locate 1,2,"WTS":IfEnd
+If C=3:Then Locate 1,1,"WRT":Locate 1,2,"WST":IfEnd
+Locate 5,1,Intg (P×100+0.5)÷100
+Locate 5,2,Intg (Q×100+0.5)÷100
+Locate 1,3,"SUMA W"
+Locate 7,3,Intg ((P+Q)×100+0.5)÷100
+Locate 1,4,"P W"
+Locate 7,4,Intg (List 9[1]×100+0.5)÷100
+While Getkey>0:WhileEnd
+While Getkey=0:WhileEnd
+0→X
+IfEnd
 If X=1:Then
 ClrText
 "1=LINEA 2=FASE"?→T

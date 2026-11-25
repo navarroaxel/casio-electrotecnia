@@ -80,7 +80,7 @@ describe("wattmeters", () => {
 });
 
 describe("TRIFAS listing run by the interpreter", () => {
-  const K = { TENS: 72, CARGA: 62, SOLVE: 52, MED: 73, EXIT: 71, ARON: 62, ONE: 72 };
+  const K = { TENS: 72, CARGA: 62, SOLVE: 52, BANCO: 73, FASOR: 63, MED: 53, EXIT: 71, ARON: 62, ONE: 72 };
   const rows = (gfx: ReturnType<typeof newGfx>, label: string) => {
     for (const sc of gfx.screens) {
       const l = sc.find((x) => x[2] === label && x[0] === 1);
@@ -141,7 +141,7 @@ describe("TRIFAS listing run by the interpreter", () => {
   test("the arctangent is right in every quadrant and near the axes (Aron: φ from P and Q)", () => {
     for (const [W1, W2] of [[1000, 500], [500, 1000], [-300, 900], [-900, -100], [-100, -900], [100, -900], [1000, 1000], [1000, -1000], [3, 1e-9], [0.001, 700]]) {
       const gfx = newGfx();
-      runBasic(TRIFAS_LINES, [0, W1, W2], gfx, newMem(), [K.MED, K.ARON, K.EXIT]);
+      runBasic(TRIFAS_LINES, [0, 2, W1, W2], gfx, newMem(), [K.MED, K.EXIT]); // 2 = ARON in the submenu
       const m = aron(W1, W2);
       const r = rows(gfx, "FI GRADOS")!;
       expect(Math.abs((r[1] as number) - m.phi)).toBeLessThanOrEqual(0.0051);
@@ -151,7 +151,7 @@ describe("TRIFAS listing run by the interpreter", () => {
   });
   test("one wattmeter (exercise 2) from the listing", () => {
     const gfx = newGfx();
-    runBasic(TRIFAS_LINES, [0, 2, 220, 10, 2193.93], gfx, newMem(), [K.MED, K.ONE, K.EXIT]);
+    runBasic(TRIFAS_LINES, [0, 1, 2, 220, 10, 2193.93], gfx, newMem(), [K.MED, K.EXIT]); // 1 = UN VATIMETRO
     const m = oneWattmeter(220 * Math.sqrt(3), 10, 2193.93);
     within(rows(gfx, "Q VAR")![1], m.Q);
     within(rows(gfx, "S VA")![1], m.S);
@@ -160,6 +160,177 @@ describe("TRIFAS listing run by the interpreter", () => {
   });
   test("the file", () => {
     expect(() => programBytes(TRIFAS_LINES)).not.toThrow();
-    expect(buildG1m("TRIFAS", TRIFAS_LINES).length).toBeLessThan(12000);
+    expect(buildG1m("TRIFAS", TRIFAS_LINES).length).toBeLessThan(20000);
+  });
+});
+
+describe("FASORIAL: the phasor diagram drawn by the listing", () => {
+  const K = { TENS: 72, CARGA: 62, SOLVE: 52, FASOR: 63, EXIT: 71 };
+  const draw = (conn: 1 | 2 | 3, input: ThreePhaseInput) => {
+    const gfx = newGfx();
+    const refN = { RN: 1, SN: 2, TN: 3, RS: 4, ST: 5, TR: 6 }[input.ref];
+    runBasic(
+      TRIFAS_LINES,
+      [0, input.sequence === "RST" ? 1 : 2, refN, input.value, input.angle, conn, ...input.Z.flat()],
+      gfx, newMem(), [K.TENS, K.CARGA, K.SOLVE, K.FASOR, K.EXIT],
+    );
+    return gfx.pages.slice(1); // page 0 is what came before the first Cls
+  };
+  // the long segments are the phasors and edges; the barbs (two per arrow) are short
+  const near = (a: number, b: number, tol: number) => expect(Math.abs(a - b)).toBeLessThanOrEqual(tol);
+  const hasSegment = (segs: number[][], x1: number, y1: number, x2: number, y2: number, tol: number) =>
+    segs.some((s) => Math.hypot(s[0] - x1, s[1] - y1) < tol && Math.hypot(s[2] - x2, s[3] - y2) < tol);
+  // what stays on the screen: every segment end inside the window, every text inside Text's range
+  const inside = (p: ReturnType<typeof newGfx>["pages"][number]) => {
+    const [x0, x1, , y0, y1] = p.window!;
+    for (const s of p.segments) {
+      expect(s[0]).toBeGreaterThanOrEqual(x0 - 1e-9); expect(s[2]).toBeLessThanOrEqual(x1 + 1e-9);
+      expect(Math.min(s[1], s[3])).toBeGreaterThanOrEqual(y0 - 1e-9); expect(Math.max(s[1], s[3])).toBeLessThanOrEqual(y1 + 1e-9);
+    }
+    for (const [r, c] of p.texts) { expect(r).toBeGreaterThanOrEqual(1); expect(r).toBeLessThanOrEqual(57); expect(c).toBeGreaterThanOrEqual(1); expect(c).toBeLessThanOrEqual(121); }
+  };
+
+  test("4 wires: page 1 has U_R U_S U_T from O and the line-voltage triangle, page 2 the currents and I_N", () => {
+    const pages = draw(1, EX1);
+    expect(pages).toHaveLength(2);
+    const m = solveThreePhase(EX1);
+    const [v, c] = pages;
+    // equal scale on both axes: the window is twice as wide as high
+    for (const p of pages) { const w = p.window!; near((w[1] - w[0]) / (w[4] - w[3]), 2, 1e-9); near(w[0], -w[1], 1e-9); near(w[3], -w[4], 1e-9); }
+    m.U.forEach((u) => expect(hasSegment(v.segments, 0, 0, u[0], u[1], 1e-6)).toBe(true));
+    for (const [a, b] of [[0, 1], [1, 2], [2, 0]]) expect(hasSegment(v.segments, m.U[a][0], m.U[a][1], m.U[b][0], m.U[b][1], 1e-6)).toBe(true);
+    [...m.I, m.IN!].forEach((i) => expect(hasSegment(c.segments, 0, 0, i[0], i[1], 1e-6)).toBe(true));
+    // the longest phasor of each page is at the same fraction of the window (scale 1/1.25)
+    near(Math.max(...m.U.map(mag)) * 1.25, v.window![4], 1e-6);
+    near(Math.max(...m.I.map(mag), mag(m.IN!)) * 1.25, c.window![4], 1e-6);
+    expect(v.texts.map((t) => t[2])).toEqual(expect.arrayContaining(["R", "S", "T", "O", "U MAX"]));
+    expect(c.texts.map((t) => t[2])).toEqual(expect.arrayContaining(["IR", "IS", "IT", "IN", "I MAX"]));
+    pages.forEach(inside);
+  });
+  test("star without neutral: N (the load's neutral) and the voltages N → R S T", () => {
+    const inp = { ...EX1, connection: "Y3" as const };
+    const pages = draw(2, inp);
+    const m = solveThreePhase(inp);
+    const n = m.UNN!;
+    m.U.forEach((u) => expect(hasSegment(pages[0].segments, n[0], n[1], u[0], u[1], 1e-6)).toBe(true));
+    expect(pages[0].plots.some((p) => Math.hypot(p[0] - n[0], p[1] - n[1]) < 1e-6)).toBe(true);
+    expect(pages[0].texts.map((t) => t[2])).toContain("N");
+    pages.forEach(inside);
+  });
+  test("delta: the phase currents I_RS I_ST I_TR are drawn next to the line currents", () => {
+    const inp: ThreePhaseInput = { sequence: "RTS", ref: "TN", value: 127, angle: 15, connection: "D", Z: [[20, 40], [30, -10], [25, 0]] };
+    const pages = draw(3, inp);
+    const m = solveThreePhase(inp);
+    [...m.I, ...m.Ielem].forEach((i) => expect(hasSegment(pages[1].segments, 0, 0, i[0], i[1], 1e-6)).toBe(true));
+    expect(pages[1].texts.map((t) => t[2])).toEqual(expect.arrayContaining(["RS", "ST", "TR"]));
+    pages.forEach(inside);
+  });
+  test("it fits on the screen for every reference, sequence and connection, and for a very unbalanced load", () => {
+    for (const conn of [1, 2, 3] as const)
+      for (const sequence of ["RST", "RTS"] as const)
+        for (const ref of ["RN", "TR"] as const) {
+          const inp: ThreePhaseInput = { sequence, ref, value: 380, angle: 90, connection: (["Y4", "Y3", "D"] as const)[conn - 1], Z: [[10, 0], [10, 90], [10, -90]] };
+          draw(conn, inp).forEach(inside);
+        }
+  });
+  test("the arrowheads are 25° off the shaft and a tenth of the window long", () => {
+    const [v] = draw(1, EX1);
+    const W = v.window![4];
+    const m = solveThreePhase(EX1);
+    const tip = m.U[0];
+    const barbs = v.segments.filter((s) => Math.hypot(s[0] - tip[0], s[1] - tip[1]) < 1e-6 && Math.hypot(s[2], s[3]) > 0 && Math.hypot(s[2] - 0, s[3] - 0) > 1e-6 && Math.hypot(s[2] - s[0], s[3] - s[1]) < W);
+    expect(barbs.length).toBeGreaterThanOrEqual(2);
+    barbs.slice(0, 2).forEach((s) => near(Math.hypot(s[2] - s[0], s[3] - s[1]), 0.1 * W, 1e-3));
+  });
+});
+
+describe("BANCO C and VATIMETROS (two wattmeters on the real load) from the listing", () => {
+  // menu keys: items 1..7 of the main menu, items 1..3 of a submenu
+  const KEY = { TENS: 72, CARGA: 62, SOLVE: 52, BANCO: 73, FASOR: 63, VATIM: 53, EXIT: 71, SUB1: 72, SUB2: 62, SUB3: 52 };
+  const SRC = (conn: number, input: ThreePhaseInput) => [
+    0, input.sequence === "RST" ? 1 : 2, { RN: 1, SN: 2, TN: 3, RS: 4, ST: 5, TR: 6 }[input.ref], input.value, input.angle, conn, ...input.Z.flat(),
+  ];
+  const run = (inputs: number[], keys: number[]) => {
+    const gfx = newGfx();
+    runBasic(TRIFAS_LINES, inputs, gfx, newMem(), keys);
+    return gfx;
+  };
+  const row = (gfx: ReturnType<typeof newGfx>, label: string) => {
+    for (const sc of [...gfx.screens].reverse()) { // the last screen that has it (RESOLVER shows Q VAR too, before the bank)
+      const l = sc.find((x) => x[2] === label && x[0] === 1);
+      if (l) return sc.filter((x) => x[1] === l[1]).map((x) => x[2]);
+    }
+    return undefined;
+  };
+  const close = (v: unknown, ref: number, tol: number) => expect(Math.abs((v as number) - ref)).toBeLessThanOrEqual(tol);
+  // the exercise of the figure: 100 kVA load, φ = 60° inductive, balanced, U_R = 220∠90°, direct sequence; |Z| = 220²/(100000/3)
+  const Z100: [number, number] = [(220 * 220) / (100000 / 3), 60];
+  const FIG: ThreePhaseInput = { sequence: "RST", ref: "RN", value: 220, angle: 90, connection: "Y4", Z: [Z100, Z100, Z100] };
+  const wattmeter = (u: [number, number], i: [number, number]) => u[0] * i[0] + u[1] * i[1];
+
+  test("figure, bank out, common line S: W_RS = U_RS·I_R·cos(30° + 60°) = 0 and W_TS = 50 kW", () => {
+    const g = run([...SRC(1, FIG), 3, 2], [KEY.TENS, KEY.CARGA, KEY.SOLVE, KEY.VATIM, KEY.EXIT]); // 3 = 2 VAT. CARGA REAL, common 2 = S
+    close(row(g, "WRS")![1], 0, 0.01);
+    close(row(g, "WTS")![1], 50000, 1);
+    close(row(g, "SUMA W")![1], 50000, 1);
+    close(row(g, "P W")![1], 50000, 1);
+  });
+  test("guide 608 (22∠0°, 38∠90°, 38∠−90°; star without neutral): W_RT = 3290 W, W_ST = −1100 W, P = 2200 W", () => {
+    const inp: ThreePhaseInput = { sequence: "RST", ref: "RN", value: 220, angle: 90, connection: "Y3", Z: [[22, 0], [38, 90], [38, -90]] };
+    const g = run([...SRC(2, inp), 3, 3], [KEY.TENS, KEY.CARGA, KEY.SOLVE, KEY.VATIM, KEY.EXIT]);
+    // the guide rounds U_L to 380 V (the exact line voltage is 220·√3 = 381,05 V): 1 % of its values
+    close(row(g, "WRT")![1], 3290, 33);
+    close(row(g, "WST")![1], -1100, 11);
+    close(row(g, "SUMA W")![1], 2200, 22);
+    // and the listing is the model: W = Re(U·I*)
+    const m = solveThreePhase(inp);
+    close(row(g, "WRT")![1], wattmeter([m.U[0][0] - m.U[2][0], m.U[0][1] - m.U[2][1]], m.I[0]), 0.01);
+    close(row(g, "WST")![1], wattmeter([m.U[1][0] - m.U[2][0], m.U[1][1] - m.U[2][1]], m.I[1]), 0.01);
+  });
+  test("figure, bank correcting to cos φ' = 1: C = Q/(3ωU_L²), line current in phase with U_R, W_RS = W_TS = 25 kW", () => {
+    const g = run([...SRC(1, FIG), 2, 50, 1, 3, 2], [KEY.TENS, KEY.CARGA, KEY.SOLVE, KEY.BANCO, KEY.VATIM, KEY.EXIT]); // BANCO 2 = COS FI OBJETIVO: 50 Hz, 1
+    const Q = 100000 * Math.sin(Math.PI / 3);
+    const C = Q / (3 * 2 * Math.PI * 50 * 3 * 220 * 220);
+    close(row(g, "C UF")![1], C * 1e6, 0.01);
+    close(row(g, "Q VAR")![1], 0, 0.5);
+    close(row(g, "FP")![1], 1, 1e-6);
+    close(row(g, "ILR")![1], 50000 / (3 * 220), 0.01); // P / (3·U_f) with cos φ' = 1
+    close(row(g, "ILR")![2], 90, 0.01);
+    close(row(g, "WRS")![1], 25000, 1);
+    close(row(g, "WTS")![1], 25000, 1);
+  });
+  test("bank of 100 µF: I_RC = j·3ωC·U_R (a delta of C is a star of 3C) and I_LR = I_R + I_RC; Q and the power factor follow", () => {
+    const g = run([...SRC(1, FIG), 1, 50, 100], [KEY.TENS, KEY.CARGA, KEY.SOLVE, KEY.BANCO, KEY.EXIT]); // BANCO 1 = C CONOCIDO
+    const w = 2 * Math.PI * 50, c = 100e-6, Ur = 220;
+    close(row(g, "IRC")![1], 3 * w * c * Ur, 0.01);
+    close(row(g, "IRC")![2], 180, 0.01);
+    const m = solveThreePhase(FIG);
+    const ilr: [number, number] = [m.I[0][0] - 3 * w * c * Ur, m.I[0][1]]; // I_RC = j·3ωC·(j220) = −3ωC·220, real and negative
+    close(row(g, "ILR")![1], mag(ilr), 0.01);
+    close(row(g, "ILR")![2], angle(ilr), 0.01);
+    const Qn = m.Q - 3 * w * c * 3 * Ur * Ur;
+    close(row(g, "Q VAR")![1], Qn, 0.6);
+    close(row(g, "FP")![1], m.P / Math.hypot(m.P, Qn), 0.0051); // shown with 2 decimals
+  });
+  test("with a bank, FASORIAL draws a third screen: I_L from O and the bank's current from the tip of I to the tip of I_L", () => {
+    const g = run([...SRC(1, FIG), 1, 50, 100], [KEY.TENS, KEY.CARGA, KEY.SOLVE, KEY.BANCO, KEY.FASOR, KEY.EXIT]);
+    const pages = g.pages.slice(1);
+    expect(pages).toHaveLength(3);
+    const w = 2 * Math.PI * 50, c = 100e-6;
+    const m = solveThreePhase(FIG);
+    const ic: [number, number] = [0, 3 * w * c * 220 * Math.sin(Math.PI)]; // j·3ωC·U_R, U_R = 220∠90°: only the sign matters here
+    const seg = pages[2].segments;
+    const has = (x1: number, y1: number, x2: number, y2: number) => seg.some((s) => Math.hypot(s[0] - x1, s[1] - y1) < 1e-4 && Math.hypot(s[2] - x2, s[3] - y2) < 1e-4);
+    const ur: [number, number] = [0, 220];
+    const irc: [number, number] = [-3 * w * c * ur[1], 0]; // j·(3ωC)·(0 + j220)
+    expect(has(m.I[0][0], m.I[0][1], m.I[0][0] + irc[0], m.I[0][1] + irc[1])).toBe(true);
+    expect(has(0, 0, m.I[0][0] + irc[0], m.I[0][1] + irc[1])).toBe(true);
+    expect(pages[2].texts.map((t) => t[2])).toEqual(expect.arrayContaining(["ILR", "ILS", "ILT", "IRC"]));
+    void ic;
+    for (const [r, cc] of pages[2].texts) { expect(r).toBeGreaterThanOrEqual(1); expect(r).toBeLessThanOrEqual(57); expect(cc).toBeGreaterThanOrEqual(1); expect(cc).toBeLessThanOrEqual(121); }
+  });
+  test("QUITAR BANCO takes the third screen away", () => {
+    const g = run([...SRC(1, FIG), 1, 50, 100, 3], [KEY.TENS, KEY.CARGA, KEY.SOLVE, KEY.BANCO, KEY.BANCO, KEY.FASOR, KEY.EXIT]); // then BANCO 3 = QUITAR
+    expect(g.pages.slice(1)).toHaveLength(2);
   });
 });

@@ -10,7 +10,8 @@ with an independent model.
 | Program | Status | What it does |
 | --- | --- | --- |
 | **POLIARM** | done | Non-sinusoidal (polyharmonic) circuits: a source feeding linear R-L-C branches in parallel plus a load whose harmonic currents are known. With the capacitor out ("L abierta") and compensating a share of Q ("L cerrada"): ammeter reading (rms current), wattmeter reading (P), Q (Budeanu), S, distortion power D, power factor, THD of current and voltage, and the capacitor C. |
-| **TRIFAS** | done | Three-phase systems: star with neutral (4 wires), star without neutral (3 wires, neutral displacement) or delta, balanced or not; line, neutral and phase currents; P, Q, S; the balanced load measured with one wattmeter (Q/√3) or the Aron connection. |
+| **TRIFAS** | done | Three-phase systems: star with neutral (4 wires), star without neutral (3 wires, neutral displacement) or delta, balanced or not; line, neutral and phase currents; P, Q, S; a capacitor bank in delta (given C or a target power factor) with the line currents ahead of it; the phasor diagram on the screen; the two wattmeters on the real load (any common line, with or without the bank) and the balanced load measured with one wattmeter (Q/√3) or the Aron connection. |
+| **POLITRI** | done | Three-phase systems with harmonics (guide exercises 704-706): balanced star with the load's current given or with R, XL, XC per phase, neutral connected or not (line current, **neutral current**, P, Q, S, D, power factor, current of each harmonic); and three currents of any size (rms of each phase, neutral current, most loaded phase). |
 
 ### POLIARM
 
@@ -46,21 +47,38 @@ With the exam's rounded 220 V / 30 A / 25 A / 10 A (11 A and 11 A in the branche
 
 ### TRIFAS
 
-Menu: **TENSIONES**, **CARGA**, **RESOLVER**, **MEDICION BALANC.**, **BORRAR TODO**, **SALIR** (arrow keys + `EXE`, or the small number). Data persist (`0 = new`, `1 = go on`).
+Menu: **TENSIONES**, **CARGA**, **RESOLVER**, **BANCO C**, **FASORIAL**, **VATIMETROS**, **BORRAR TODO** (arrow keys + `EXE`, or the small number; `EXIT` or `0` leave). Data persist (`0 = new`, `1 = go on`). Programs saved with an older version must start with `0 = new` (the lists 15-20 of the bank are new).
 
 1. **TENSIONES** — sequence (1 = RST direct, 2 = RTS inverse) and **one voltage as reference**: which one (U_RN, U_SN, U_TN or the line voltages U_RS, U_ST, U_TR), its rms value and its angle. The other five follow.
 2. **CARGA** — connection (1 star with neutral, 2 star without neutral, 3 delta) and the three impedances as modulus ∠ degrees (phases R S T, or RS ST TR in delta).
 3. **RESOLVER** — page 1: I_R, I_S, I_T as modulus and angle, then I_N = I_R + I_S + I_T (4 wires) or the displacement U_N'N (3 wires), and P, Q, S (S = |P + jQ|). Page 2: the voltages on the load's phases (3 wires) or the phase currents (delta).
-4. **MEDICION BALANC.** — *one wattmeter* in a line with its voltage coil between the other two (it reads Q/√3: U in V as line or phase voltage, I, W1 → P, Q, S, power factor, φ) or *Aron* (W1, W2 → P = W1 + W2, Q = √3·(W1 − W2)).
+4. **BANCO C** — three equal capacitors in **delta** ahead of the load (run RESOLVER first). Type a number: `1` *C conocido* (frequency in Hz, C in µF), `2` *COS FI objetivo* (frequency and the power factor to reach, the load being inductive: Q_C = Q − P·tan φ', C = Q_C/(3·ω·U_L²) with U_L = |U_RS|) or `3` *quitar banco*. Page 1: the **line currents ahead of the bank** I_LR, I_LS, I_LT = I + I_bank (what an ammeter or wattmeter before the bank sees), C in µF, and Q, S and the power factor with the bank (P does not change). Page 2: the bank's line currents I_RC = I_RS,C − I_TR,C, … (a delta of C draws what a star of 3C would). The bank stays connected for FASORIAL and VATIMETROS until *quitar banco*.
+5. **FASORIAL** — the phasor diagram on the graph screen, drawn from what **RESOLVER** left (run RESOLVER first; any key goes on to the next screen). Screen 1: U_R, U_S, U_T from the origin (tips R S T, angles as the voltage you entered as reference), the line voltages U_RS, U_ST, U_TR as the triangle joining the tips and, for the star without neutral, the load's neutral **N** (O' in the guides) with the voltages on the load N → R S T. Screen 2: I_R, I_S, I_T, plus I_N (4 wires) or I_RS, I_ST, I_TR (delta). Screen 3, only with a bank connected: the load's currents I_R I_S I_T, the bank's current IRC ISC ITC **drawn from the tip of I to the tip of I_L**, and the line currents ILR ILS ILT from the origin (I_L = I + I_C as on paper). Each screen has its own scale, equal on both axes, so its longest phasor fills it; the value of that longest phasor is printed at the bottom (`U MAX` / `I MAX`). Arrowheads are 25° off the shaft.
+6. **VATIMETROS** — type `1` *un vatímetro equilibrada* (voltage coil between the other two lines: reads Q/√3; U in V as line or phase voltage, I, W1 → P, Q, S, power factor, φ), `2` *Aron equilibrada* (W1, W2 → P = W1 + W2, Q = √3·(W1 − W2)) and `3` **2 VAT. CARGA REAL**: the two wattmeters on the load as it is (unbalanced allowed, ahead of the bank if one is connected), with their current coils in two lines and the voltage coils to the third, **common** line (1 R, 2 S, 3 T): W = Re(U·I*) with U the line voltage between each line and the common one (W_RT and W_ST, or W_RS and W_TS as in the figure of the exam, …); it also shows their sum and the P of RESOLVER (with 4 wires the sum is not P).
 
 Phasors are printed rounded to two decimals, the angle in degrees. The arctangent is written in Basic (two halvings and a series), like sine and cosine in POLIARM.
 
 **Worked example 1** (4 wires, U_ST = 294,2 ∠0°, RST, Z_R = 10 ∠0°, Z_S = 15 ∠30°, Z_T = 10 ∠−30°): `TENSIONES` → `1`, `5`, `294.2`, `0`; `CARGA` → `1`, `10, 0`, `15, 30`, `10, −30`; `RESOLVER`:
 I_R = 16,99 ∠90°, I_S = 11,32 ∠−60°, I_T = 16,99 ∠−120°, I_N = 8,05 ∠−110,6°.
 
-**Worked example 2** (one wattmeter, 220 V phase, 10 A, W1 = 2193,93 W): `MEDICION BALANC.` → `UN VATIMETRO` → `2` (phase), `220`, `10`, `2193.93`: Q = 3800 var, S = 6600 VA, P = 5396 W, cos φ = 0,818, φ = 35,15°.
+**Worked example 2** (one wattmeter, 220 V phase, 10 A, W1 = 2193,93 W): `VATIMETROS` → `UN VAT. EQUILIB.` → `2` (phase), `220`, `10`, `2193.93`: Q = 3800 var, S = 6600 VA, P = 5396 W, cos φ = 0,818, φ = 35,15°.
+
+### POLITRI
+
+Run it and type the number: `1` **EQUILIBRADA**, `2` **DESEQUILIBRADA**, `0` leaves. Values may be **peaks** (`1`) or **rms** (`2`); up to 7 harmonics; angles in degrees; nothing is saved (everything is typed each time).
+
+**1 EQUILIBRADA** (balanced star, only the R phase is given: S and T are the same wave one third of a period later / earlier, so the harmonic n of S is shifted −120°·n and of T +120°·n). Per harmonic: order, U and its angle (0 if the source has no such harmonic) and, if you chose `1` (**I dada**), the current I and its angle, or, if you chose `2` (**R L C**), nothing more: the load is R and X_n = n·XL − XC/n per phase (XL and XC at the fundamental; XC = 0 means no capacitor), I_n = U_n/√(R² + X_n²), P = 3·R·ΣI_n², Q = 3·Σ X_n·I_n². It shows I line (ammeter, √ΣI_n²), **I neutral = 3·√(Σ I_n²) over the harmonics that are multiples of 3** (the others cancel between the three phases), P, Q, S = 3·U_rms·I_rms, D = √(S² − P² − Q²), FP, and a second page with the order and the current of each harmonic. With the **neutral disconnected** (R L C mode) the triple harmonics neither carry current nor appear on the load: they are left out of U_rms and I_rms.
+
+**2 DESEQUILIBRADA**: per harmonic, I and the angle of R, S and T. It shows the rms current of each phase, **I neutral = √Σ_n |I_R,n + I_S,n + I_T,n|²** (phasor sum per harmonic) and the most loaded phase.
+
+**Worked examples** (every one checked in `politri.test.ts` against the guide, and the neutral current against an integration of the three waveforms):
+- **704** (peaks, 220 V source, R taken as the 0° reference): `1`, `1` (peaks), `1` (I dada), `5` harmonics: `1, 311.127, 0, 141.42, 60` / `3, 0, 0, 113.13, 92` / `5, 0, 0, 84.85, 214` / `7, 0, 0, 56.57, 32` / `9, 0, 0, 28.28, 60`. I line = **148,32 A**, I neutral = **247,4 A**, P = 33 000 W (11 000 W per phase), Q = −57 157 var (−19 052 per phase: with U at 0° and i at +60° the current leads; the guide gives the magnitude), S = 97 891 VA (the guide's 97 621 VA uses 380/√3 = 219,4 V instead of 220 V), D ≈ 72 300 VA (guide 71 910).
+- **705** (rms): `2`, `2` (rms), `4` harmonics, per harmonic `I_R, ∠, I_S, ∠, I_T, ∠`: `20,30,20,−90,20,150` / `12,0,8,120,4,−120` / `6,0,4,0,2,0` / `2,30,2,30,2,30`. I_R = **24,17 A** (guide 24,16), I_S = **22 A**, I_T = **20,59 A** (guide 20,6), I_N = **15,1 A** (guide 15); the most loaded phase is R.
+- **706** (rms, R = 1 Ω, XL = 0,314 Ω): `1`, `2` (rms), `2` (R L C), `1`, `0.314`, `0`, `1` (neutral connected), `5` harmonics: `1, 206.4, 0` / `3, 49, 0` / `5, 40, 0` / `7, 41.3, 0` / `9, 9.8, 0`. I line = **202,0 A**, I neutral = 3·√(I₃² + I₉²) = **107,5 A**. The guide gets 203,6 A because it rounds z₁ to 1,04 (the exact value is √(1 + 0,314²) = 1,048): its I₁ = 198,5 A is 0,8 % above the exact 196,9 A, and its P = 124 348 W is 1,5 % above (the program gives 122 444 W). Neutral **disconnected** (`0`): no I₃ or I₉, no neutral current; the guide gives no answers for this case, the program applies the rule above.
 
 ## Build and test
+
+**Worked example 3** (the exam's figure: 100 kVA, φ = 60° inductive, balanced, U_R = 220 ∠90°, direct sequence, wattmeters W1 and W3 with the common line S, bank in delta): `TENSIONES` → `1`, `1` (U_RN), `220`, `90`; `CARGA` → `1` and `1.452, 60` three times; `RESOLVER`; `VATIMETROS` → `2 VAT. CARGA REAL` → `2`: **W_RS = 0**, **W_TS = 50 000 W** (their sum is P). `BANCO C` → `COS FI OBJETIVO` → `50`, `1`: C = 632,8 µF, I_LR = 75,76 ∠90° (in phase with U_R), Q = 0; `VATIMETROS` again: **W_RS = W_TS = 25 000 W**. `FASORIAL` then draws the third screen with the bank.
 
 ```
 npm install
@@ -71,6 +89,8 @@ npm test        # phasor models vs waveform integration / circuit laws, listings
 Copy `g1m/*.g1m` into the calculator's `@MainMem` folder over USB, or type `listings/<program>.txt` in `PRGM` mode.
 
 ## Notes
+
+- **Size** (the calculator's main memory is small and the programs share it with the lists and every other program): POLIARM 3,8 KB, TRIFAS 10,3 KB, POLITRI 2,5 KB. Saving space matters more than saving lines: the arctangent is written once per block (`POLAR` in `trifas.ts`) and the rows are printed in loops, the submenus are a typed number (the arrow-key menu is only the main one), and the bank's currents are computed in RESOLVER and BANCO C only. `npm run build` prints the size of every program.
 
 - The program computes sines and cosines with its own Taylor series, so it does not depend on the calculator's angle mode (Deg / Rad).
 - A string cannot contain `+` or `-` (the writer refuses it); the 21 × 7 text-screen limits are enforced by the interpreter.
