@@ -334,3 +334,44 @@ describe("BANCO C and VATIMETROS (two wattmeters on the real load) from the list
     expect(g.pages.slice(1)).toHaveLength(2);
   });
 });
+
+describe("defaults: 0 = U_RN 220 V at 90°, a value of 0 = 220 V (phase) / 380 V (line), 0 Hz = 50 Hz", () => {
+  const K = { TENS: 72, CARGA: 62, SOLVE: 52, BANCO: 73, EXIT: 71 };
+  const Z = [10, 0, 10, 0, 10, 0]; // balanced 10 Ω, 4 wires
+  const rowOf = (g: ReturnType<typeof newGfx>, label: string) => {
+    for (const sc of [...g.screens].reverse()) {
+      const l = sc.find((x) => x[2] === label && x[0] === 1);
+      if (l) return sc.filter((x) => x[1] === l[1]).map((x) => x[2]);
+    }
+    return undefined;
+  };
+  const solve = (inputs: number[]) => {
+    const g = newGfx();
+    runBasic(TRIFAS_LINES, [0, ...inputs], g, newMem(), [K.TENS, K.CARGA, K.SOLVE, K.EXIT]);
+    return rowOf(g, "IR")!;
+  };
+  test("reference 0: U_RN = 220 ∠90° (direct sequence) with no more questions", () => {
+    const r = solve([1, 0, 1, ...Z]); // sequence 1, NRO 0, connection 1, impedances
+    expect(r[1]).toBeCloseTo(22, 2); // I_R = 220 / 10
+    expect(r[2]).toBeCloseTo(90, 2);
+  });
+  test("a value of 0 is 220 V for a phase reference and 380 V for a line reference (the angle is still asked)", () => {
+    const ph = solve([1, 1, 0, 90, 1, ...Z]);
+    expect(ph[1]).toBeCloseTo(22, 2);
+    expect(ph[2]).toBeCloseTo(90, 2);
+    const line = solve([1, 4, 0, 120, 1, ...Z]); // U_RS = 380 ∠120° → U_RN = 380/√3 ∠90°
+    expect(line[1]).toBeCloseTo(380 / Math.sqrt(3) / 10, 2);
+    expect(line[2]).toBeCloseTo(90, 2);
+  });
+  test("a typed value still wins", () => {
+    expect(solve([1, 1, 127, 0, 1, ...Z])[1]).toBeCloseTo(12.7, 2);
+  });
+  test("BANCO C: 0 Hz is 50 Hz", () => {
+    const get = (f: number) => {
+      const g = newGfx();
+      runBasic(TRIFAS_LINES, [0, 1, 0, 1, ...Z, 1, f, 100], g, newMem(), [K.TENS, K.CARGA, K.SOLVE, K.BANCO, K.EXIT]);
+      return rowOf(g, "ILR")!;
+    };
+    expect(get(0)).toEqual(get(50));
+  });
+});

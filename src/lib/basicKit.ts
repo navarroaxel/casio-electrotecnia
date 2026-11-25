@@ -60,27 +60,30 @@ export const TWO_PI = "6.28318530717959";
 // cos and sen of the angle in B (degrees) → C = cos, D = sen, with the angle in radians in E and its square in F. Taylor
 // series (Horner) after bringing the angle into −π…π: it does not depend on the calculator's angle unit (Deg / Rad), which a
 // program cannot rely on. Error < 1e-10 on the whole range.
-export const horner = (x: string, first: number, count: number): string => {
-  // 1 − x/(a(a+1))·(1 − x/(b(b+1))·(…)) with a = first, first+2, …
+// Horner's form 1 − x/(a(a+1))·(1 − x/(b(b+1))·(…)) written one operation per line, innermost first, into the variable `into`:
+// a single nested expression (11 levels for the cosine) makes the calculator stop with "Stack ERROR" (its stacks hold 10
+// numeric values and 26 commands), and the manual's remedy is to divide the formula into parts. a = first, first+2, …
+export const hornerLines = (x: string, first: number, count: number, into: string): string[] => {
   const den = (k: number) => (first + 2 * k) * (first + 2 * k + 1);
-  let s = `1–${x}÷${den(count - 1)}`;
-  for (let k = count - 2; k >= 0; k--) s = `1–${x}÷${den(k)}×(${s})`;
-  return s;
+  const out = [`1–${x}÷${den(count - 1)}→${into}`];
+  for (let k = count - 2; k >= 0; k--) out.push(`1–${x}÷${den(k)}×${into}→${into}`);
+  return out;
 };
 export const TRIG = [
   `B×${PI}÷180→E`,
   `E–${TWO_PI}×Intg (E÷${TWO_PI}+0.5)→E`,
   "E×E→F",
-  `${horner("F", 1, 11)}→C`,
-  `E×(${horner("F", 2, 10)})→D`,
+  ...hornerLines("F", 1, 11, "C"),
+  ...hornerLines("F", 2, 10, "D"),
+  "E×D→D",
 ];
 
 
 // Polar form of the phasor (re, im): magnitude → `mag`, angle in degrees (−180…180] → `ang`. Arctangent by two angle halvings
 // and a Taylor series, with the quadrant fixed by hand; scratch letters C D E F G H. Error < 1e-9 degrees.
 export const atan2Lines = (re: string, im: string, mag: string, ang: string): string[] => {
-  let series = "1÷15";
-  for (const d of [13, 11, 9, 7, 5, 3]) series = `1÷${d}–H×(${series})`;
+  // the series 1/3 − H·(1/5 − H·(1/7 − …)) one line at a time in E (free once G = E/F is known), for the same reason as above
+  const series = ["1÷15→E", ...[13, 11, 9, 7, 5, 3].map((d) => `1÷${d}–H×E→E`)];
   return [
     `${re}→C:${im}→D`,
     `√(C×C+D×D)→${mag}`,
@@ -92,7 +95,8 @@ export const atan2Lines = (re: string, im: string, mag: string, ang: string): st
     "G÷(1+√(1+G×G))→G",
     "G÷(1+√(1+G×G))→G",
     "G×G→H",
-    `G×(1–H×(${series}))×4→G`,
+    ...series,
+    "G×(1–H×E)×4→G",
     "If Abs (D)>Abs (C):Then 1.5707963267949–G→G:IfEnd",
     `If C<0:Then ${PI}–G→G:IfEnd`,
     "If D<0:Then –G→G:IfEnd",
