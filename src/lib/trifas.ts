@@ -401,6 +401,46 @@ const MOTOR_AND_PHASES = [
   "IfEnd",
 ];
 
+// CARGA, option 4 of the first menu: shows the load stored (what the other options left in Lists 3 / 4), without asking anything:
+// page 1 the impedance of each element as modulus and angle (phase R S T, RS ST TR in delta) and the connection; page 2 the P and
+// Q of each element at the loaded voltages (P + jQ = U²·Z/|Z|²) and the total P. Nothing is changed.
+const SEE_LOAD = [
+  "List 10[1]→T",
+  "For 1→K To 3",
+  "List 3[K]→List 21[K]:List 4[K]→List 22[K]",
+  "Next",
+  ...POLAR(3),
+  "ClrText",
+  'If T<3:Then Locate 1,1,"ZR":Locate 1,2,"ZS":Locate 1,3,"ZT":IfEnd',
+  'If T=3:Then Locate 1,1,"ZRS":Locate 1,2,"ZST":Locate 1,3,"ZTR":IfEnd',
+  "For 1→J To 3",
+  ...showPolar("J", "J"),
+  "Next",
+  'If T=1:Then Locate 1,5,"ESTRELLA 4 HILOS":IfEnd',
+  'If T=2:Then Locate 1,5,"ESTRELLA 3 HILOS":IfEnd',
+  'If T=3:Then Locate 1,5,"TRIANGULO":IfEnd',
+  'Locate 1,6,"Z EN OHM Y GRADOS"',
+  ...PAUSE,
+  "For 1→K To 3",
+  "List 1[K]×List 1[K]+List 2[K]×List 2[K]→E",
+  "If T=3:Then",
+  "K+1→J:If J>3:Then 1→J:IfEnd",
+  "(List 1[K]–List 1[J])×(List 1[K]–List 1[J])+(List 2[K]–List 2[J])×(List 2[K]–List 2[J])→E",
+  "IfEnd",
+  "List 3[K]×List 3[K]+List 4[K]×List 4[K]→D",
+  "0→List 21[K]:0→List 22[K]",
+  "If D>0:Then E×List 3[K]÷D→List 21[K]:E×List 4[K]÷D→List 22[K]:IfEnd",
+  "Next",
+  "ClrText",
+  'Locate 1,1,"PR":Locate 1,2,"PS":Locate 1,3,"PT":Locate 1,4,"QR":Locate 1,5,"QS":Locate 1,6,"QT"',
+  "For 1→J To 3",
+  "Locate 5,J,Intg (List 21[J]×100+0.5)÷100",
+  "Locate 5,J+3,Intg (List 22[J]×100+0.5)÷100",
+  "Next",
+  ...valueRow(7, "P TOT", "(List 21[1]+List 21[2]+List 21[3])"),
+  ...PAUSE,
+];
+
 export const TRIFAS_LINES = [
   ...pickMenu({ title: "DATOS", items: ["NUEVOS", "SEGUIR GUARDADOS"], choice: "A" }),
   // EXIT is "seguir": it never wipes the stored data
@@ -462,8 +502,13 @@ export const TRIFAS_LINES = [
   "IfEnd",
   // 2: the load
   "If O=2:Then",
-  ...pickMenu({ title: "CONEXION", items: ["ESTRELLA 4 HILOS", "ESTRELLA 3 HILOS", "TRIANGULO"], choice: "T" }),
+  ...pickMenu({ title: "CONEXION (4 = VER)", items: ["ESTRELLA 4 HILOS", "ESTRELLA 3 HILOS", "TRIANGULO", "VER LA GUARDADA"], choice: "T" }),
   "If T<1:Then 1→T:IfEnd",
+  "0→Z:If T=4:Then 1→Z:IfEnd",
+  "If Z=1:Then",
+  ...SEE_LOAD,
+  "IfEnd",
+  "If Z=0:Then",
   "T→List 10[1]",
   ...pickMenu({ title: "CARGA SIMETRICA?", items: ["SI", "NO"], choice: "S", sel: "L" }),
   "If S=2:Then 0→S:IfEnd",
@@ -511,6 +556,7 @@ export const TRIFAS_LINES = [
   "IfEnd",
   "If S=1:Then",
   "List 3[1]→List 3[2]:List 3[1]→List 3[3]:List 4[1]→List 4[2]:List 4[1]→List 4[3]",
+  "IfEnd",
   "IfEnd",
   "IfEnd",
   // 7: clear everything (asks first)

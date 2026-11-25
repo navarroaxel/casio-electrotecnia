@@ -1,5 +1,5 @@
 import { newGfx, newMem, runBasic } from "./casioBasic";
-import { KEY as KEYS, banco, carga, cargaZ, exit, fasor, flow, go, nuevo, solve, tens, vatim, type Flow } from "./flows";
+import { KEY as KEYS, banco, carga, cargaZ, exit, fasor, flow, go, nuevo, solve, tens, vatim, verCarga, type Flow } from "./flows";
 import { buildG1m, programBytes } from "../casioG1m";
 import { TRIFAS_LINES, aron, angle, mag, oneWattmeter, solveThreePhase, type ThreePhaseInput } from "../trifas";
 
@@ -609,5 +609,53 @@ describe("CARGA 5 (motor + loads on each phase) and the per-phase pages of RESOL
   });
   test("an empty motor and empty phases do not break RESOLVER (an open load)", () => {
     expect(() => run(carga(1, false, 5, [0, 0, 0, 0]))).not.toThrow();
+  });
+});
+
+describe("CARGA 4: VER LA GUARDADA shows the stored load without asking or changing anything", () => {
+  const rowOf = (g: ReturnType<typeof newGfx>, label: string) => {
+    for (const sc of [...g.screens].reverse()) {
+      const l = sc.find((x) => x[2] === label && x[0] === 1);
+      if (l) return sc.filter((x) => x[1] === l[1]).map((x) => x[2]);
+    }
+    return undefined;
+  };
+  const near = (v: unknown, ref: number, tol = 0.0051) => expect(Math.abs((v as number) - ref)).toBeLessThanOrEqual(tol);
+  // guide 615: motor 60 kW at 0,85 + 24 / 15 / 9 kW at cos φ = 1 on R / S / T, star with neutral
+  const MOTOR_AND_LAMPS = carga(1, false, 5, [60, 0.85, 24, 1, 15, 1, 9, 1]);
+  const Qm = (60000 * Math.tan(Math.acos(0.85))) / 3;
+
+  test("page 1: the impedance of each phase, U² / S ∠φ, and the connection", () => {
+    const g = go(TRIFAS_LINES, flow(nuevo(), tens(), MOTOR_AND_LAMPS, verCarga(), exit()));
+    for (const [label, P] of [["ZR", 44000], ["ZS", 35000], ["ZT", 29000]] as const) {
+      const r = rowOf(g, label)!;
+      near(r[1], 220 ** 2 / Math.hypot(P, Qm));
+      near(r[2], (Math.atan2(Qm, P) * 180) / Math.PI);
+    }
+    expect(g.screens.some((sc) => sc.some((x) => x[2] === "ESTRELLA 4 HILOS"))).toBe(true);
+  });
+  test("page 2: P and Q of each phase and the total P (108 kW)", () => {
+    const g = go(TRIFAS_LINES, flow(nuevo(), tens(), MOTOR_AND_LAMPS, verCarga(), exit()));
+    [["PR", 44000], ["PS", 35000], ["PT", 29000]].forEach(([l, v]) => near(rowOf(g, l as string)![1], v as number, 0.05));
+    ["QR", "QS", "QT"].forEach((l) => near(rowOf(g, l)![1], Qm, 0.05));
+    near(rowOf(g, "P TOT")![1], 108000, 0.1);
+  });
+  test("in delta the labels are those of the lines and the voltage on each element is the line voltage", () => {
+    const g = go(TRIFAS_LINES, flow(nuevo(), tens(), cargaZ(3, [[20, 40], [30, -10], [25, 0]]), verCarga(), exit()));
+    near(rowOf(g, "ZRS")![1], 20);
+    near(rowOf(g, "ZRS")![2], 40);
+    near(rowOf(g, "ZST")![2], -10);
+    near(rowOf(g, "PR")![1], (3 * 220 ** 2 * Math.cos((40 * Math.PI) / 180)) / 20, 0.05); // U_L² · cos φ / |Z|
+  });
+  test("it changes nothing: RESOLVER after the view gives the same as without it", () => {
+    const base = flow(nuevo(), tens(), MOTOR_AND_LAMPS);
+    const without = rowOf(go(TRIFAS_LINES, flow(base, solve(), exit())), "IR")!;
+    const withView = rowOf(go(TRIFAS_LINES, flow(base, verCarga(), solve(), exit())), "IR")!;
+    expect(withView).toEqual(without);
+  });
+  test("it is the fourth item of the first CARGA menu", () => {
+    const g = go(TRIFAS_LINES, flow(nuevo(), tens(), verCarga(), exit()));
+    const sc = g.screens.find((s) => s.some((x) => x[2] === "CONEXION (4 = VER)"))!;
+    expect(sc.filter((x) => x[0] === 3).map((x) => x[2])).toEqual(["ESTRELLA 4 HILOS¹", "ESTRELLA 3 HILOS²", "TRIANGULO³", "VER LA GUARDADA⁴"]);
   });
 });

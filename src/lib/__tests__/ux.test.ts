@@ -2,7 +2,7 @@ import { newGfx, newMem, runBasic, type Gfx } from "./casioBasic";
 import { POLIARM_LINES } from "../poliarm";
 import { POLITRI_LINES } from "../politri";
 import { TRIFAS_LINES } from "../trifas";
-import { banco, carga, cargaZ, exit, flow, go, nuevo, solve, tens, vatim, type Flow } from "./flows";
+import { banco, carga, cargaZ, exit, flow, go, nuevo, solve, tens, vatim, verCarga, type Flow } from "./flows";
 
 // Screens the user reads: the "EXE" in the corner of the last line (columns 19-21) must not sit on top of anything, and no
 // text may run off the 21 columns. Every result screen of the three programs is checked, in the typical flows.
@@ -36,6 +36,7 @@ describe("the result screens say EXE and nothing is under it", () => {
       flow(nuevo(), vatim(2, [], [1000, 500]), exit()), // Aron
       flow(nuevo(), tens(), carga(1, true, 4, [2, 40, 0.8, 1.8, 1]), exit()), // several loads
       flow(nuevo(), tens(), carga(1, false, 5, [60, 0.85, 24, 1, 15, 1, 9, 1]), solve(), exit()), // 615
+      flow(nuevo(), tens(), carga(1, false, 5, [60, 0.85, 24, 1, 15, 1, 9, 1]), verCarga(), exit()), // the stored load
     ];
     let hints = 0;
     for (const f of flows) hints += check(go(TRIFAS_LINES, f));

@@ -191,12 +191,13 @@ IfEnd
 If O=2:Then
 1→S:1→Y
 ClrText
-Locate 1,1,"CONEXION"
+Locate 1,1,"CONEXION (4 = VER)"
 Locate 3,2,"ESTRELLA 4 HILOS¹"
 Locate 3,3,"ESTRELLA 3 HILOS²"
 Locate 3,4,"TRIANGULO³"
+Locate 3,5,"VER LA GUARDADA⁴"
 While Y=1
-Locate 1,2," ":Locate 1,3," ":Locate 1,4," "
+Locate 1,2," ":Locate 1,3," ":Locate 1,4," ":Locate 1,5," "
 Locate 1,S+1,">"
 While Getkey>0:WhileEnd
 0→W
@@ -205,17 +206,87 @@ Getkey→W
 WhileEnd
 If W=28:Then S–1→S:IfEnd
 If W=37:Then S+1→S:IfEnd
-If S<1:Then 3→S:IfEnd
-If S>3:Then 1→S:IfEnd
+If S<1:Then 4→S:IfEnd
+If S>4:Then 1→S:IfEnd
 If W=31:Then 0→Y:IfEnd
 If W=72:Then 1→S:0→Y:IfEnd
 If W=62:Then 2→S:0→Y:IfEnd
 If W=52:Then 3→S:0→Y:IfEnd
+If W=73:Then 4→S:0→Y:IfEnd
 If W=71:Then 0→S:0→Y:IfEnd
 If W=47:Then 0→S:0→Y:IfEnd
 WhileEnd
 S→T
 If T<1:Then 1→T:IfEnd
+0→Z:If T=4:Then 1→Z:IfEnd
+If Z=1:Then
+List 10[1]→T
+For 1→K To 3
+List 3[K]→List 21[K]:List 4[K]→List 22[K]
+Next
+For 1→J To 3
+List 21[J]→C:List 22[J]→D
+√(C×C+D×D)→X
+0→Y
+If X>0:Then
+Abs (D)→E:Abs (C)→F
+If E>F:Then E→G:F→E:G→F:IfEnd
+E÷F→G
+G÷(1+√(1+G×G))→G
+G÷(1+√(1+G×G))→G
+G×G→H
+1÷15→E
+1÷13–H×E→E
+1÷11–H×E→E
+1÷9–H×E→E
+1÷7–H×E→E
+1÷5–H×E→E
+1÷3–H×E→E
+G×(1–H×E)×4→G
+If Abs (D)>Abs (C):Then 1.5707963267949–G→G:IfEnd
+If C<0:Then 3.14159265358979–G→G:IfEnd
+If D<0:Then –G→G:IfEnd
+G×180÷3.14159265358979→Y
+IfEnd
+X→List 23[J]:Y→List 24[J]
+Next
+ClrText
+If T<3:Then Locate 1,1,"ZR":Locate 1,2,"ZS":Locate 1,3,"ZT":IfEnd
+If T=3:Then Locate 1,1,"ZRS":Locate 1,2,"ZST":Locate 1,3,"ZTR":IfEnd
+For 1→J To 3
+Locate 5,J,Intg (List 23[J]×100+0.5)÷100
+Locate 13,J,Intg (List 24[J]×100+0.5)÷100
+Next
+If T=1:Then Locate 1,5,"ESTRELLA 4 HILOS":IfEnd
+If T=2:Then Locate 1,5,"ESTRELLA 3 HILOS":IfEnd
+If T=3:Then Locate 1,5,"TRIANGULO":IfEnd
+Locate 1,6,"Z EN OHM Y GRADOS"
+Locate 19,7,"EXE"
+While Getkey>0:WhileEnd
+While Getkey=0:WhileEnd
+For 1→K To 3
+List 1[K]×List 1[K]+List 2[K]×List 2[K]→E
+If T=3:Then
+K+1→J:If J>3:Then 1→J:IfEnd
+(List 1[K]–List 1[J])×(List 1[K]–List 1[J])+(List 2[K]–List 2[J])×(List 2[K]–List 2[J])→E
+IfEnd
+List 3[K]×List 3[K]+List 4[K]×List 4[K]→D
+0→List 21[K]:0→List 22[K]
+If D>0:Then E×List 3[K]÷D→List 21[K]:E×List 4[K]÷D→List 22[K]:IfEnd
+Next
+ClrText
+Locate 1,1,"PR":Locate 1,2,"PS":Locate 1,3,"PT":Locate 1,4,"QR":Locate 1,5,"QS":Locate 1,6,"QT"
+For 1→J To 3
+Locate 5,J,Intg (List 21[J]×100+0.5)÷100
+Locate 5,J+3,Intg (List 22[J]×100+0.5)÷100
+Next
+Locate 1,7,"P TOT"
+Locate 7,7,Intg ((List 21[1]+List 21[2]+List 21[3])×100+0.5)÷100
+Locate 19,7,"EXE"
+While Getkey>0:WhileEnd
+While Getkey=0:WhileEnd
+IfEnd
+If Z=0:Then
 T→List 10[1]
 1→L:1→Y
 ClrText
@@ -439,6 +510,7 @@ Next
 IfEnd
 If S=1:Then
 List 3[1]→List 3[2]:List 3[1]→List 3[3]:List 4[1]→List 4[2]:List 4[1]→List 4[3]
+IfEnd
 IfEnd
 IfEnd
 If O=7:Then
