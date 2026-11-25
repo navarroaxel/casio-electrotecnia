@@ -380,7 +380,6 @@ If G<0:Then 0→G:IfEnd
 If D>0:Then G÷(3×List 10[4]×D)→List 10[3]:IfEnd
 IfEnd
 If X>0:Then
-If X<3:Then
 For 1→K To 3
 K+1→J:If J>3:Then 1→J:IfEnd
 List 1[K]–List 1[J]→A:List 2[K]–List 2[J]→B
@@ -394,6 +393,7 @@ List 19[K]–List 19[J]→List 15[K]:List 20[K]–List 20[J]→List 16[K]
 IfEnd
 List 5[K]+List 15[K]→List 17[K]:List 6[K]+List 16[K]→List 18[K]
 Next
+If X<3:Then
 List 1[1]–List 1[2]→A:List 2[1]–List 2[2]→B
 List 9[2]–3×List 10[4]×List 10[3]×(A×A+B×B)→Q
 List 9[1]→P:√(P×P+Q×Q)→S
@@ -498,17 +498,26 @@ For 1→K To 3
 0→List 11[K+6]:0→List 12[K+6]:List 17[K]→List 13[K+6]:List 18[K]→List 14[K+6]
 Next
 IfEnd
-0→M
+0→M:0→I:0→J:0→L:0→P
 For 1→K To N
 √(List 13[K]×List 13[K]+List 14[K]×List 14[K])→D
 If D>M:Then D→M:IfEnd
 √(List 11[K]×List 11[K]+List 12[K]×List 12[K])→D
 If D>M:Then D→M:IfEnd
+List 11[K]→X:List 12[K]→Y
+If X<I:Then X→I:IfEnd:If X>J:Then X→J:IfEnd:If Y<L:Then Y→L:IfEnd:If Y>P:Then Y→P:IfEnd
+List 13[K]→X:List 14[K]→Y
+If X<I:Then X→I:IfEnd:If X>J:Then X→J:IfEnd:If Y<L:Then Y→L:IfEnd:If Y>P:Then Y→P:IfEnd
 Next
 If M=0:Then 1→M:IfEnd
-1.25×M→W
+(I+J)÷2→V:(L+P)÷2→S
+(P–L)÷2→W:(J–I)÷4→D:If D>W:Then D→W:IfEnd
+If W=0:Then M→W:IfEnd
+1.2×W→W
+1→Q
+While Q=1
 Cls
-ViewWindow –2×W,2×W,1,–W,W,1
+ViewWindow V–2×W,V+2×W,1,S–W,S+W,1
 For 1→K To N
 List 11[K]→A:List 12[K]→B:List 13[K]→X:List 14[K]→Y
 F-Line A,B,X,Y
@@ -520,10 +529,10 @@ F-Line X,Y,X–(C×0.9063–D×0.4226),Y–(C×0.4226+D×0.9063)
 F-Line X,Y,X–(C×0.9063+D×0.4226),Y–(D×0.9063–C×0.4226)
 X+2.2×C→G:Y+2.2×D→H
 If Z=3:Then If K>3:Then If K<7:Then (A+X)÷2→G:(B+Y)÷2→H:IfEnd:IfEnd:IfEnd
-Intg ((W–H)÷(2×W)×63)–2→R
+Intg ((S+W–H)÷(2×W)×63)–2→R
 If R<1:Then 1→R:IfEnd
 If R>57:Then 57→R:IfEnd
-Intg ((G+2×W)÷(4×W)×127)–2→C
+Intg ((G–V+2×W)÷(4×W)×127)–2→C
 If C<1:Then 1→C:IfEnd
 If C>115:Then 115→C:IfEnd
 If Z=1:Then
@@ -554,17 +563,23 @@ IfEnd
 IfEnd
 Next
 PlotOn 0,0
-Text 33,66,"O"
+Intg ((S+W–(–0.04×W))÷(2×W)×63)–2→R
+If R<1:Then 1→R:IfEnd
+If R>57:Then 57→R:IfEnd
+Intg (((0.04×W)–V+2×W)÷(4×W)×127)–2→C
+If C<1:Then 1→C:IfEnd
+If C>115:Then 115→C:IfEnd
+Text R,C,"O"
 If Z=1:Then
 F-Line List 1[1],List 2[1],List 1[2],List 2[2]
 F-Line List 1[2],List 2[2],List 1[3],List 2[3]
 F-Line List 1[3],List 2[3],List 1[1],List 2[1]
 If T=2:Then
 PlotOn List 9[4],List 9[5]
-Intg ((W–(List 9[5]–0.08×W))÷(2×W)×63)–2→R
+Intg ((S+W–(List 9[5]–0.08×W))÷(2×W)×63)–2→R
 If R<1:Then 1→R:IfEnd
 If R>57:Then 57→R:IfEnd
-Intg (((List 9[4]+0.08×W)+2×W)÷(4×W)×127)–2→C
+Intg (((List 9[4]+0.08×W)–V+2×W)÷(4×W)×127)–2→C
 If C<1:Then 1→C:IfEnd
 If C>115:Then 115→C:IfEnd
 Text R,C,"N"
@@ -575,7 +590,19 @@ If Z>1:Then Text 57,1,"I MAX":IfEnd
 Text 57,30,Intg (M×10+0.5)÷10
 Text 57,100,"EXE"
 While Getkey>0:WhileEnd
-While Getkey=0:WhileEnd
+0→F
+While F=0
+Getkey→F
+WhileEnd
+If F=42:Then W÷1.5→W:IfEnd
+If F=32:Then W×1.5→W:IfEnd
+If F=28:Then S+0.5×W→S:IfEnd
+If F=37:Then S–0.5×W→S:IfEnd
+If F=38:Then V–W→V:IfEnd
+If F=27:Then V+W→V:IfEnd
+If F=31:Then 0→Q:IfEnd
+If F=47:Then 0→Q:IfEnd
+WhileEnd
 Next
 IfEnd
 If O=6:Then

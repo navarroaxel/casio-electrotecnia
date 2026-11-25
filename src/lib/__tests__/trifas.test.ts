@@ -165,16 +165,16 @@ describe("TRIFAS listing run by the interpreter", () => {
 });
 
 describe("FASORIAL: the phasor diagram drawn by the listing", () => {
-  const K = { TENS: 72, CARGA: 62, SOLVE: 52, FASOR: 63, EXIT: 71 };
-  const draw = (conn: 1 | 2 | 3, input: ThreePhaseInput) => {
+  const K = { TENS: 72, CARGA: 62, SOLVE: 52, FASOR: 63, EXIT: 71, EXE: 31, PLUS: 42, MINUS: 32, UP: 28, DOWN: 37, LEFT: 38, RIGHT: 27 };
+  const draw = (conn: 1 | 2 | 3, input: ThreePhaseInput, keys: number[] = [K.EXE, K.EXE]) => {
     const gfx = newGfx();
     const refN = { RN: 1, SN: 2, TN: 3, RS: 4, ST: 5, TR: 6 }[input.ref];
     runBasic(
       TRIFAS_LINES,
       [0, input.sequence === "RST" ? 1 : 2, refN, input.value, input.angle, conn, 0, 1, ...input.Z.flat()],
-      gfx, newMem(), [K.TENS, K.CARGA, K.SOLVE, K.FASOR, K.EXIT],
+      gfx, newMem(), [K.TENS, K.CARGA, K.SOLVE, K.FASOR, ...keys, K.EXIT],
     );
-    return gfx.pages.slice(1); // page 0 is what came before the first Cls
+    return gfx.pages.slice(1); // page 0 is what came before the first Cls (one page per drawing: a zoom or a pan draws again)
   };
   // the long segments are the phasors and edges; the barbs (two per arrow) are short
   const near = (a: number, b: number, tol: number) => expect(Math.abs(a - b)).toBeLessThanOrEqual(tol);
@@ -196,13 +196,20 @@ describe("FASORIAL: the phasor diagram drawn by the listing", () => {
     const m = solveThreePhase(EX1);
     const [v, c] = pages;
     // equal scale on both axes: the window is twice as wide as high
-    for (const p of pages) { const w = p.window!; near((w[1] - w[0]) / (w[4] - w[3]), 2, 1e-9); near(w[0], -w[1], 1e-9); near(w[3], -w[4], 1e-9); }
+    for (const p of pages) { const w = p.window!; near((w[1] - w[0]) / (w[4] - w[3]), 2, 1e-9); }
     m.U.forEach((u) => expect(hasSegment(v.segments, 0, 0, u[0], u[1], 1e-6)).toBe(true));
     for (const [a, b] of [[0, 1], [1, 2], [2, 0]]) expect(hasSegment(v.segments, m.U[a][0], m.U[a][1], m.U[b][0], m.U[b][1], 1e-6)).toBe(true);
     [...m.I, m.IN!].forEach((i) => expect(hasSegment(c.segments, 0, 0, i[0], i[1], 1e-6)).toBe(true));
-    // the longest phasor of each page is at the same fraction of the window (scale 1/1.25)
-    near(Math.max(...m.U.map(mag)) * 1.25, v.window![4], 1e-6);
-    near(Math.max(...m.I.map(mag), mag(m.IN!)) * 1.25, c.window![4], 1e-6);
+    // the window is fitted to the drawing: the origin and every tip (or I_N) inside, centred on their box, 20 % margin
+    const fit = (pts: [number, number][]) => {
+      const xs = pts.map((q) => q[0]), ys = pts.map((q) => q[1]);
+      const x0 = Math.min(0, ...xs), x1 = Math.max(0, ...xs), y0 = Math.min(0, ...ys), y1 = Math.max(0, ...ys);
+      return { cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, W: 1.2 * Math.max((y1 - y0) / 2, (x1 - x0) / 4) };
+    };
+    for (const [page, pts] of [[v, m.U], [c, [...m.I, m.IN!]]] as const) {
+      const f = fit(pts as [number, number][]), w = page.window!;
+      near((w[0] + w[1]) / 2, f.cx, 1e-6); near((w[3] + w[4]) / 2, f.cy, 1e-6); near((w[4] - w[3]) / 2, f.W, 1e-6);
+    }
     expect(v.texts.map((t) => t[2])).toEqual(expect.arrayContaining(["R", "S", "T", "O", "U MAX"]));
     expect(c.texts.map((t) => t[2])).toEqual(expect.arrayContaining(["IR", "IS", "IT", "IN", "I MAX"]));
     pages.forEach(inside);
@@ -233,9 +240,32 @@ describe("FASORIAL: the phasor diagram drawn by the listing", () => {
           draw(conn, inp).forEach(inside);
         }
   });
+  test("zoom: + shows half-again closer (the half-height ÷ 1,5), − farther, and the same centre", () => {
+    const pages = draw(1, EX1, [K.PLUS, K.EXE, K.EXE]); // screen 1 drawn, + → drawn again, EXE; screen 2, EXE
+    expect(pages).toHaveLength(3);
+    const h = (q: (typeof pages)[number]) => (q.window![4] - q.window![3]) / 2;
+    const cx = (q: (typeof pages)[number]) => (q.window![0] + q.window![1]) / 2;
+    near(h(pages[1]), h(pages[0]) / 1.5, 1e-9);
+    near(cx(pages[1]), cx(pages[0]), 1e-9);
+    const out = draw(1, EX1, [K.MINUS, K.EXE, K.EXE]);
+    near((out[1].window![4] - out[1].window![3]) / 2, (out[0].window![4] - out[0].window![3]) / 2 * 1.5, 1e-9);
+  });
+  test("pan: the arrow keys move the window (up / down by half its half-height, left / right by its half-height)", () => {
+    const pages = draw(1, EX1, [K.UP, K.LEFT, K.DOWN, K.RIGHT, K.EXE, K.EXE]);
+    expect(pages).toHaveLength(6); // the first drawing, four pans, screen 2
+    const w0 = pages[0].window!, h = (w0[4] - w0[3]) / 2;
+    near(pages[1].window![3] - w0[3], 0.5 * h, 1e-9); // up
+    near(pages[2].window![0] - w0[0], -h, 1e-9); // left, from the already panned view
+    near(pages[3].window![3] - w0[3], 0, 1e-9); // down again
+    near(pages[4].window![0] - w0[0], 0, 1e-9); // right again
+  });
+  test("the zoomed view still draws every phasor, with the labels on the screen", () => {
+    const pages = draw(1, EX1, [K.PLUS, K.PLUS, K.PLUS, K.EXE, K.EXE]);
+    for (const q of pages) for (const [r, c] of q.texts) { expect(r).toBeGreaterThanOrEqual(1); expect(r).toBeLessThanOrEqual(57); expect(c).toBeGreaterThanOrEqual(1); expect(c).toBeLessThanOrEqual(121); }
+  });
   test("the arrowheads are 25° off the shaft and a tenth of the window long", () => {
     const [v] = draw(1, EX1);
-    const W = v.window![4];
+    const W = (v.window![4] - v.window![3]) / 2;
     const m = solveThreePhase(EX1);
     const tip = m.U[0];
     const barbs = v.segments.filter((s) => Math.hypot(s[0] - tip[0], s[1] - tip[1]) < 1e-6 && Math.hypot(s[2], s[3]) > 0 && Math.hypot(s[2] - 0, s[3] - 0) > 1e-6 && Math.hypot(s[2] - s[0], s[3] - s[1]) < W);
@@ -313,7 +343,7 @@ describe("BANCO C and VATIMETROS (two wattmeters on the real load) from the list
     close(row(g, "FP")![1], m.P / Math.hypot(m.P, Qn), 0.0051); // shown with 2 decimals
   });
   test("with a bank, FASORIAL draws a third screen: I_L from O and the bank's current from the tip of I to the tip of I_L", () => {
-    const g = run([...SRC(1, FIG), 1, 50, 100], [KEY.TENS, KEY.CARGA, KEY.SOLVE, KEY.BANCO, KEY.FASOR, KEY.EXIT]);
+    const g = run([...SRC(1, FIG), 1, 50, 100], [KEY.TENS, KEY.CARGA, KEY.SOLVE, KEY.BANCO, KEY.FASOR, 31, 31, 31, KEY.EXIT]); // EXE on each of the 3 screens
     const pages = g.pages.slice(1);
     expect(pages).toHaveLength(3);
     const w = 2 * Math.PI * 50, c = 100e-6;
@@ -329,8 +359,14 @@ describe("BANCO C and VATIMETROS (two wattmeters on the real load) from the list
     void ic;
     for (const [r, cc] of pages[2].texts) { expect(r).toBeGreaterThanOrEqual(1); expect(r).toBeLessThanOrEqual(57); expect(cc).toBeGreaterThanOrEqual(1); expect(cc).toBeLessThanOrEqual(121); }
   });
+  test("QUITAR BANCO gives the wattmeters the load's own currents back (W_RS = 0, W_TS = 50 kW again, not 25 kW)", () => {
+    // bank to cos φ' = 1 (BANCO 2: 50 Hz, 1), then BANCO 3 = QUITAR, then the two wattmeters with the common line S
+    const g = run([...SRC(1, FIG), 2, 50, 1, 3, 3, 2], [KEY.TENS, KEY.CARGA, KEY.SOLVE, KEY.BANCO, KEY.BANCO, KEY.VATIM, KEY.EXIT]);
+    close(row(g, "WRS")![1], 0, 0.01);
+    close(row(g, "WTS")![1], 50000, 1);
+  });
   test("QUITAR BANCO takes the third screen away", () => {
-    const g = run([...SRC(1, FIG), 1, 50, 100, 3], [KEY.TENS, KEY.CARGA, KEY.SOLVE, KEY.BANCO, KEY.BANCO, KEY.FASOR, KEY.EXIT]); // then BANCO 3 = QUITAR
+    const g = run([...SRC(1, FIG), 1, 50, 100, 3], [KEY.TENS, KEY.CARGA, KEY.SOLVE, KEY.BANCO, KEY.BANCO, KEY.FASOR, 31, 31, KEY.EXIT]); // then BANCO 3 = QUITAR: 2 screens
     expect(g.pages.slice(1)).toHaveLength(2);
   });
 });
