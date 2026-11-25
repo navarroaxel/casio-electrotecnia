@@ -94,7 +94,7 @@ describe("TRIFAS listing run by the interpreter", () => {
     const refN = { RN: 1, SN: 2, TN: 3, RS: 4, ST: 5, TR: 6 }[input.ref];
     runBasic(
       TRIFAS_LINES,
-      [0, input.sequence === "RST" ? 1 : 2, refN, input.value, input.angle, conn, ...input.Z.flat()],
+      [0, input.sequence === "RST" ? 1 : 2, refN, input.value, input.angle, conn, 0, 1, ...input.Z.flat()],
       gfx, newMem(), [K.TENS, K.CARGA, K.SOLVE, K.EXIT],
     );
     return gfx;
@@ -171,7 +171,7 @@ describe("FASORIAL: the phasor diagram drawn by the listing", () => {
     const refN = { RN: 1, SN: 2, TN: 3, RS: 4, ST: 5, TR: 6 }[input.ref];
     runBasic(
       TRIFAS_LINES,
-      [0, input.sequence === "RST" ? 1 : 2, refN, input.value, input.angle, conn, ...input.Z.flat()],
+      [0, input.sequence === "RST" ? 1 : 2, refN, input.value, input.angle, conn, 0, 1, ...input.Z.flat()],
       gfx, newMem(), [K.TENS, K.CARGA, K.SOLVE, K.FASOR, K.EXIT],
     );
     return gfx.pages.slice(1); // page 0 is what came before the first Cls
@@ -248,7 +248,7 @@ describe("BANCO C and VATIMETROS (two wattmeters on the real load) from the list
   // menu keys: items 1..7 of the main menu, items 1..3 of a submenu
   const KEY = { TENS: 72, CARGA: 62, SOLVE: 52, BANCO: 73, FASOR: 63, VATIM: 53, EXIT: 71, SUB1: 72, SUB2: 62, SUB3: 52 };
   const SRC = (conn: number, input: ThreePhaseInput) => [
-    0, input.sequence === "RST" ? 1 : 2, { RN: 1, SN: 2, TN: 3, RS: 4, ST: 5, TR: 6 }[input.ref], input.value, input.angle, conn, ...input.Z.flat(),
+    0, input.sequence === "RST" ? 1 : 2, { RN: 1, SN: 2, TN: 3, RS: 4, ST: 5, TR: 6 }[input.ref], input.value, input.angle, conn, 0, 1, ...input.Z.flat(),
   ];
   const run = (inputs: number[], keys: number[]) => {
     const gfx = newGfx();
@@ -337,7 +337,7 @@ describe("BANCO C and VATIMETROS (two wattmeters on the real load) from the list
 
 describe("defaults: 0 = U_RN 220 V at 90°, a value of 0 = 220 V (phase) / 380 V (line), 0 Hz = 50 Hz", () => {
   const K = { TENS: 72, CARGA: 62, SOLVE: 52, BANCO: 73, EXIT: 71 };
-  const Z = [10, 0, 10, 0, 10, 0]; // balanced 10 Ω, 4 wires
+  const Z = [0, 1, 10, 0, 10, 0, 10, 0]; // not symmetric-flagged, by impedance: balanced 10 Ω (the answers to SIMETRICA and CARGA POR first)
   const rowOf = (g: ReturnType<typeof newGfx>, label: string) => {
     for (const sc of [...g.screens].reverse()) {
       const l = sc.find((x) => x[2] === label && x[0] === 1);
@@ -373,5 +373,46 @@ describe("defaults: 0 = U_RN 220 V at 90°, a value of 0 = 220 V (phase) / 380 V
       return rowOf(g, "ILR")!;
     };
     expect(get(0)).toEqual(get(50));
+  });
+});
+
+describe("CARGA: symmetric load and the load given by Z, S or P", () => {
+  const K = { TENS: 72, CARGA: 62, SOLVE: 52, EXIT: 71 };
+  const line = (g: ReturnType<typeof newGfx>, label: string) => {
+    for (const sc of [...g.screens].reverse()) {
+      const l = sc.find((x) => x[2] === label && x[0] === 1);
+      if (l) return sc.filter((x) => x[1] === l[1]).map((x) => x[2]);
+    }
+    return undefined;
+  };
+  // sequence 1, reference 0 (U_RN = 220 ∠90°), then the connection and the load's answers
+  const run = (load: number[]) => {
+    const g = newGfx();
+    runBasic(TRIFAS_LINES, [0, 1, 0, ...load], g, newMem(), [K.TENS, K.CARGA, K.SOLVE, K.EXIT]);
+    return g;
+  };
+  const UL = 220 * Math.sqrt(3);
+  test("symmetric: one impedance is enough and gives the same currents as the three typed", () => {
+    const three = line(run([1, 0, 1, 10, 30, 10, 30, 10, 30]), "IS")!;
+    const one = line(run([1, 1, 1, 10, 30]), "IS")!;
+    expect(one).toEqual(three);
+  });
+  test("by S: 100 kVA total at 60° (symmetric, star) is Z = 1,452 ∠60° and I_line = 100 000 / (√3·U_L) ∠30°", () => {
+    const r = line(run([1, 1, 2, 100000, 60]), "IR")!;
+    expect(r[1] as number).toBeCloseTo(100000 / (Math.sqrt(3) * UL), 2);
+    expect(r[2] as number).toBeCloseTo(30, 2);
+  });
+  test("by P: 50 kW total at 60° is the same load as 100 kVA at 60°", () => {
+    expect(line(run([1, 1, 3, 50000, 60]), "IR")).toEqual(line(run([1, 1, 2, 100000, 60]), "IR"));
+  });
+  test("delta: S is shared by the three elements and the voltage is the line voltage", () => {
+    const r = line(run([3, 1, 2, 100000, 60]), "IR")!;
+    expect(r[1] as number).toBeCloseTo(100000 / (Math.sqrt(3) * UL), 2); // the line current of a balanced 100 kVA load is the same
+    const phase = line(run([3, 1, 2, 100000, 60]), "IRS")!;
+    expect(phase[1] as number).toBeCloseTo(100000 / (3 * UL), 2);
+  });
+  test("not symmetric: S and P are those of each phase", () => {
+    const r = line(run([1, 0, 2, 33333.333, 60, 33333.333, 60, 33333.333, 60]), "IR")!;
+    expect(r[1] as number).toBeCloseTo(100000 / (Math.sqrt(3) * UL), 2);
   });
 });

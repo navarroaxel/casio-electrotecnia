@@ -125,7 +125,17 @@ Locate 1,4,"3 TRIANGULO"
 If T<1:Then 1→T:IfEnd
 If T>3:Then 3→T:IfEnd
 T→List 10[1]
-For 1→K To 3
+"SIMETRICA 1=SI 0=NO"?→S
+3→M:If S=1:Then 1→M:IfEnd
+ClrText
+Locate 1,1,"CARGA POR:"
+Locate 1,2,"1 Z OHM"
+Locate 1,3,"2 S VA"
+Locate 1,4,"3 P W"
+"NRO"?→V
+If V<1:Then 1→V:IfEnd
+If V>3:Then 3→V:IfEnd
+For 1→K To M
 ClrText
 If T<3:Then
 If K=1:Then Locate 1,1,"Z DE LA FASE R":IfEnd
@@ -137,7 +147,12 @@ If K=1:Then Locate 1,1,"Z ENTRE R Y S":IfEnd
 If K=2:Then Locate 1,1,"Z ENTRE S Y T":IfEnd
 If K=3:Then Locate 1,1,"Z ENTRE T Y R":IfEnd
 IfEnd
-"MODULO OHM"?→A
+If S=1:Then Locate 1,1,"Z DE CADA FASE":IfEnd
+If V>1:Then Locate 1,2,"POR FASE":IfEnd
+If V>1:Then If S=1:Then Locate 1,2,"TOTAL TRIFASICA":IfEnd:IfEnd
+If V=1:Then "MODULO OHM"?→A:IfEnd
+If V=2:Then "S VA"?→A:IfEnd
+If V=3:Then "P W"?→A:IfEnd
 "ANGULO GRADOS"?→B
 B×3.14159265358979÷180→E
 E–6.28318530717959×Intg (E÷6.28318530717959+0.5)→E
@@ -164,8 +179,21 @@ E×E→F
 1–F÷20×D→D
 1–F÷6×D→D
 E×D→D
+If V>1:Then
+If V=3:Then If C>0.000001:Then A÷C→A:IfEnd:IfEnd
+If S=1:Then A÷3→A:IfEnd
+List 1[K]×List 1[K]+List 2[K]×List 2[K]→E
+If T=3:Then
+K+1→J:If J>3:Then 1→J:IfEnd
+(List 1[K]–List 1[J])×(List 1[K]–List 1[J])+(List 2[K]–List 2[J])×(List 2[K]–List 2[J])→E
+IfEnd
+If A>0:Then E÷A→A:IfEnd
+IfEnd
 A×C→List 3[K]:A×D→List 4[K]
 Next
+If S=1:Then
+List 3[1]→List 3[2]:List 3[1]→List 3[3]:List 4[1]→List 4[2]:List 4[1]→List 4[3]
+IfEnd
 IfEnd
 If O=7:Then
 ClrText
@@ -545,6 +573,7 @@ Text 57,1,"U MAX"
 IfEnd
 If Z>1:Then Text 57,1,"I MAX":IfEnd
 Text 57,30,Intg (M×10+0.5)÷10
+Text 57,100,"EXE"
 While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 Next
