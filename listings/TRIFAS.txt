@@ -1,5 +1,28 @@
-"0=NUEVO 1=SEGUIR"?→A
-If A=0:Then
+1→S:1→Y
+ClrText
+Locate 1,1,"DATOS"
+Locate 3,2,"NUEVOS¹"
+Locate 3,3,"SEGUIR GUARDADOS²"
+While Y=1
+Locate 1,2," ":Locate 1,3," "
+Locate 1,S+1,">"
+While Getkey>0:WhileEnd
+0→W
+While W=0
+Getkey→W
+WhileEnd
+If W=28:Then S–1→S:IfEnd
+If W=37:Then S+1→S:IfEnd
+If S<1:Then 2→S:IfEnd
+If S>2:Then 1→S:IfEnd
+If W=31:Then 0→Y:IfEnd
+If W=72:Then 1→S:0→Y:IfEnd
+If W=62:Then 2→S:0→Y:IfEnd
+If W=71:Then 0→S:0→Y:IfEnd
+If W=47:Then 0→S:0→Y:IfEnd
+WhileEnd
+S→A
+If A=1:Then
 {0,0,0}→List 1
 {0,0,0}→List 2
 {0,0,0}→List 3
@@ -57,14 +80,64 @@ WhileEnd
 R→O
 If O=0:Then Stop:IfEnd
 If O=1:Then
+1→S:1→Y
 ClrText
-"1=RST 2=RTS"?→T
+Locate 1,1,"SECUENCIA"
+Locate 3,2,"RST DIRECTA¹"
+Locate 3,3,"RTS INVERSA²"
+While Y=1
+Locate 1,2," ":Locate 1,3," "
+Locate 1,S+1,">"
+While Getkey>0:WhileEnd
+0→W
+While W=0
+Getkey→W
+WhileEnd
+If W=28:Then S–1→S:IfEnd
+If W=37:Then S+1→S:IfEnd
+If S<1:Then 2→S:IfEnd
+If S>2:Then 1→S:IfEnd
+If W=31:Then 0→Y:IfEnd
+If W=72:Then 1→S:0→Y:IfEnd
+If W=62:Then 2→S:0→Y:IfEnd
+If W=71:Then 0→S:0→Y:IfEnd
+If W=47:Then 0→S:0→Y:IfEnd
+WhileEnd
+S→T
+1→S:1→Y
 ClrText
-Locate 1,1,"REFERENCIA:"
-Locate 1,2,"1 URN 2 USN 3 UTN"
-Locate 1,3,"4 URS 5 UST 6 UTR"
-Locate 1,4,"0 URN 220 V 90 GRAD"
-"REFERENCIA 0=DEFECTO"?→R
+Locate 3,1,"URN 220V 90 USUAL¹"
+Locate 3,2,"URN²"
+Locate 3,3,"USN³"
+Locate 3,4,"UTN⁴"
+Locate 3,5,"URS⁵"
+Locate 3,6,"UST⁶"
+Locate 3,7,"UTR⁷"
+While Y=1
+Locate 1,1," ":Locate 1,2," ":Locate 1,3," ":Locate 1,4," ":Locate 1,5," ":Locate 1,6," ":Locate 1,7," "
+Locate 1,S+0,">"
+While Getkey>0:WhileEnd
+0→W
+While W=0
+Getkey→W
+WhileEnd
+If W=28:Then S–1→S:IfEnd
+If W=37:Then S+1→S:IfEnd
+If S<1:Then 7→S:IfEnd
+If S>7:Then 1→S:IfEnd
+If W=31:Then 0→Y:IfEnd
+If W=72:Then 1→S:0→Y:IfEnd
+If W=62:Then 2→S:0→Y:IfEnd
+If W=52:Then 3→S:0→Y:IfEnd
+If W=73:Then 4→S:0→Y:IfEnd
+If W=63:Then 5→S:0→Y:IfEnd
+If W=53:Then 6→S:0→Y:IfEnd
+If W=74:Then 7→S:0→Y:IfEnd
+If W=71:Then 0→S:0→Y:IfEnd
+If W=47:Then 0→S:0→Y:IfEnd
+WhileEnd
+S→R
+R–1→R:If R<0:Then 0→R:IfEnd
 0→Y
 If R=0:Then 1→R:220→A:90→B:1→Y:IfEnd
 If Y=0:Then
@@ -116,27 +189,91 @@ A×C→List 1[K]:A×D→List 2[K]
 Next
 IfEnd
 If O=2:Then
+1→S:1→Y
 ClrText
-Locate 1,1,"CONEXION:"
-Locate 1,2,"1 ESTRELLA 4 HILOS"
-Locate 1,3,"2 ESTRELLA 3 HILOS"
-Locate 1,4,"3 TRIANGULO"
-"CONEXION 1 A 3"?→T
+Locate 1,1,"CONEXION"
+Locate 3,2,"ESTRELLA 4 HILOS¹"
+Locate 3,3,"ESTRELLA 3 HILOS²"
+Locate 3,4,"TRIANGULO³"
+While Y=1
+Locate 1,2," ":Locate 1,3," ":Locate 1,4," "
+Locate 1,S+1,">"
+While Getkey>0:WhileEnd
+0→W
+While W=0
+Getkey→W
+WhileEnd
+If W=28:Then S–1→S:IfEnd
+If W=37:Then S+1→S:IfEnd
+If S<1:Then 3→S:IfEnd
+If S>3:Then 1→S:IfEnd
+If W=31:Then 0→Y:IfEnd
+If W=72:Then 1→S:0→Y:IfEnd
+If W=62:Then 2→S:0→Y:IfEnd
+If W=52:Then 3→S:0→Y:IfEnd
+If W=71:Then 0→S:0→Y:IfEnd
+If W=47:Then 0→S:0→Y:IfEnd
+WhileEnd
+S→T
 If T<1:Then 1→T:IfEnd
-If T>3:Then 3→T:IfEnd
 T→List 10[1]
-"SIMETRICA 1=SI 0=NO"?→S
-3→M:If S=1:Then 1→M:IfEnd
+1→L:1→Y
 ClrText
-Locate 1,1,"CARGA POR:"
-Locate 1,2,"1 Z OHM"
-Locate 1,3,"2 S VA"
-Locate 1,4,"3 P W"
-Locate 1,5,"4 VARIAS P Y COS FI"
-Locate 1,6,"5 MOTOR Y CARGAS FASE"
-"CARGA POR 1 A 5"?→V
+Locate 1,1,"CARGA SIMETRICA?"
+Locate 3,2,"SI¹"
+Locate 3,3,"NO²"
+While Y=1
+Locate 1,2," ":Locate 1,3," "
+Locate 1,L+1,">"
+While Getkey>0:WhileEnd
+0→W
+While W=0
+Getkey→W
+WhileEnd
+If W=28:Then L–1→L:IfEnd
+If W=37:Then L+1→L:IfEnd
+If L<1:Then 2→L:IfEnd
+If L>2:Then 1→L:IfEnd
+If W=31:Then 0→Y:IfEnd
+If W=72:Then 1→L:0→Y:IfEnd
+If W=62:Then 2→L:0→Y:IfEnd
+If W=71:Then 0→L:0→Y:IfEnd
+If W=47:Then 0→L:0→Y:IfEnd
+WhileEnd
+L→S
+If S=2:Then 0→S:IfEnd
+3→M:If S=1:Then 1→M:IfEnd
+1→L:1→Y
+ClrText
+Locate 1,1,"CARGA POR"
+Locate 3,2,"Z (OHM)¹"
+Locate 3,3,"S (VA) Y ANGULO²"
+Locate 3,4,"P (W) Y ANGULO³"
+Locate 3,5,"VARIAS P Y COS FI⁴"
+Locate 3,6,"MOTOR Y FASES⁵"
+While Y=1
+Locate 1,2," ":Locate 1,3," ":Locate 1,4," ":Locate 1,5," ":Locate 1,6," "
+Locate 1,L+1,">"
+While Getkey>0:WhileEnd
+0→W
+While W=0
+Getkey→W
+WhileEnd
+If W=28:Then L–1→L:IfEnd
+If W=37:Then L+1→L:IfEnd
+If L<1:Then 5→L:IfEnd
+If L>5:Then 1→L:IfEnd
+If W=31:Then 0→Y:IfEnd
+If W=72:Then 1→L:0→Y:IfEnd
+If W=62:Then 2→L:0→Y:IfEnd
+If W=52:Then 3→L:0→Y:IfEnd
+If W=73:Then 4→L:0→Y:IfEnd
+If W=63:Then 5→L:0→Y:IfEnd
+If W=71:Then 0→L:0→Y:IfEnd
+If W=47:Then 0→L:0→Y:IfEnd
+WhileEnd
+L→V
 If V<1:Then 1→V:IfEnd
-If V>5:Then 5→V:IfEnd
 If V=4:Then
 1→S
 ClrText
@@ -305,9 +442,30 @@ List 3[1]→List 3[2]:List 3[1]→List 3[3]:List 4[1]→List 4[2]:List 4[1]→Li
 IfEnd
 IfEnd
 If O=7:Then
+1→S:1→Y
 ClrText
 Locate 1,1,"BORRAR TODO?"
-"1=NO 2=SI"?→X
+Locate 3,2,"NO¹"
+Locate 3,3,"SI, BORRAR²"
+While Y=1
+Locate 1,2," ":Locate 1,3," "
+Locate 1,S+1,">"
+While Getkey>0:WhileEnd
+0→W
+While W=0
+Getkey→W
+WhileEnd
+If W=28:Then S–1→S:IfEnd
+If W=37:Then S+1→S:IfEnd
+If S<1:Then 2→S:IfEnd
+If S>2:Then 1→S:IfEnd
+If W=31:Then 0→Y:IfEnd
+If W=72:Then 1→S:0→Y:IfEnd
+If W=62:Then 2→S:0→Y:IfEnd
+If W=71:Then 0→S:0→Y:IfEnd
+If W=47:Then 0→S:0→Y:IfEnd
+WhileEnd
+S→X
 If X=2:Then
 {0,0,0}→List 1
 {0,0,0}→List 2
@@ -503,18 +661,38 @@ While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 IfEnd
 If O=4:Then
+1→S:1→Y
 ClrText
 Locate 1,1,"BANCO C EN TRIANGULO"
-Locate 1,2,"1 C CONOCIDO"
-Locate 1,3,"2 COS FI OBJETIVO"
-Locate 1,4,"3 QUITAR BANCO"
-"OPCION 1 A 3"?→X
+Locate 3,2,"C CONOCIDO¹"
+Locate 3,3,"COS FI OBJETIVO²"
+Locate 3,4,"QUITAR BANCO³"
+While Y=1
+Locate 1,2," ":Locate 1,3," ":Locate 1,4," "
+Locate 1,S+1,">"
+While Getkey>0:WhileEnd
+0→W
+While W=0
+Getkey→W
+WhileEnd
+If W=28:Then S–1→S:IfEnd
+If W=37:Then S+1→S:IfEnd
+If S<1:Then 3→S:IfEnd
+If S>3:Then 1→S:IfEnd
+If W=31:Then 0→Y:IfEnd
+If W=72:Then 1→S:0→Y:IfEnd
+If W=62:Then 2→S:0→Y:IfEnd
+If W=52:Then 3→S:0→Y:IfEnd
+If W=71:Then 0→S:0→Y:IfEnd
+If W=47:Then 0→S:0→Y:IfEnd
+WhileEnd
+S→X
 If X=3:Then 0→List 10[2]:IfEnd
 If X=1:Then
 ClrText
 "F HZ 0=50"?→F
 If F=0:Then 50→F:IfEnd
-"C MICROF"?→C
+"C µF"?→C
 1→List 10[2]
 2×3.14159265358979×F→List 10[4]
 C÷1000000→List 10[3]
@@ -589,7 +767,7 @@ For 1→J To 3
 Locate 5,J,Intg (List 23[J]×100+0.5)÷100
 Locate 13,J,Intg (List 24[J]×100+0.5)÷100
 Next
-Locate 1,4,"C UF"
+Locate 1,4,"C µF"
 Locate 7,4,Intg (List 10[3]×1000000×100+0.5)÷100
 Locate 1,5,"Q VAR"
 Locate 7,5,Intg (Q×100+0.5)÷100
@@ -764,15 +942,60 @@ WhileEnd
 Next
 IfEnd
 If O=6:Then
+1→S:1→Y
 ClrText
 Locate 1,1,"VATIMETROS"
-Locate 1,2,"1 UN VAT. EQUILIB."
-Locate 1,3,"2 ARON EQUILIBRADA"
-Locate 1,4,"3 2 VAT. CARGA REAL"
-"OPCION 1 A 3"?→X
+Locate 3,2,"UN VAT. EQUILIB.¹"
+Locate 3,3,"ARON EQUILIBRADA²"
+Locate 3,4,"VAT. CARGA REAL³"
+While Y=1
+Locate 1,2," ":Locate 1,3," ":Locate 1,4," "
+Locate 1,S+1,">"
+While Getkey>0:WhileEnd
+0→W
+While W=0
+Getkey→W
+WhileEnd
+If W=28:Then S–1→S:IfEnd
+If W=37:Then S+1→S:IfEnd
+If S<1:Then 3→S:IfEnd
+If S>3:Then 1→S:IfEnd
+If W=31:Then 0→Y:IfEnd
+If W=72:Then 1→S:0→Y:IfEnd
+If W=62:Then 2→S:0→Y:IfEnd
+If W=52:Then 3→S:0→Y:IfEnd
+If W=71:Then 0→S:0→Y:IfEnd
+If W=47:Then 0→S:0→Y:IfEnd
+WhileEnd
+S→X
 If X=3:Then
+1→S:1→Y
 ClrText
-"COMUN 1R 2S 3T"?→C
+Locate 1,1,"LINEA COMUN"
+Locate 3,2,"R¹"
+Locate 3,3,"S²"
+Locate 3,4,"T³"
+While Y=1
+Locate 1,2," ":Locate 1,3," ":Locate 1,4," "
+Locate 1,S+1,">"
+While Getkey>0:WhileEnd
+0→W
+While W=0
+Getkey→W
+WhileEnd
+If W=28:Then S–1→S:IfEnd
+If W=37:Then S+1→S:IfEnd
+If S<1:Then 3→S:IfEnd
+If S>3:Then 1→S:IfEnd
+If W=31:Then 0→Y:IfEnd
+If W=72:Then 1→S:0→Y:IfEnd
+If W=62:Then 2→S:0→Y:IfEnd
+If W=52:Then 3→S:0→Y:IfEnd
+If W=71:Then 0→S:0→Y:IfEnd
+If W=47:Then 0→S:0→Y:IfEnd
+WhileEnd
+S→C
+If C<1:Then 3→C:IfEnd
 If C=1:Then 2→A:3→B:IfEnd
 If C=2:Then 1→A:3→B:IfEnd
 If C=3:Then 1→A:2→B:IfEnd
@@ -802,7 +1025,30 @@ If Y=1:Then
 List 1[1]–List 1[2]→D:List 2[1]–List 2[2]→E:√(D×D+E×E)→A
 IfEnd
 If Y=0:Then
-"1=LINEA 2=FASE"?→T
+1→S:1→N
+ClrText
+Locate 1,1,"LA TENSION ES DE"
+Locate 3,2,"LINEA¹"
+Locate 3,3,"FASE²"
+While N=1
+Locate 1,2," ":Locate 1,3," "
+Locate 1,S+1,">"
+While Getkey>0:WhileEnd
+0→W
+While W=0
+Getkey→W
+WhileEnd
+If W=28:Then S–1→S:IfEnd
+If W=37:Then S+1→S:IfEnd
+If S<1:Then 2→S:IfEnd
+If S>2:Then 1→S:IfEnd
+If W=31:Then 0→N:IfEnd
+If W=72:Then 1→S:0→N:IfEnd
+If W=62:Then 2→S:0→N:IfEnd
+If W=71:Then 0→S:0→N:IfEnd
+If W=47:Then 0→S:0→N:IfEnd
+WhileEnd
+S→T
 If T=2:Then A×√(3)→A:IfEnd
 IfEnd
 "I A 0=DE RESOLVER"?→B

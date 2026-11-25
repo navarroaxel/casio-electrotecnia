@@ -9,7 +9,7 @@
 //     each phase and the neutral current I_N = √Σ_n |I_R,n + I_S,n + I_T,n|² (705).
 // `politriBalanced` / `politriUnbalanced` are the same arithmetic in TypeScript so the tests can compare them with the
 // waveform (rms by numerical integration) and with the listing run by the interpreter.
-import { PAUSE, TRIG } from "./basicKit";
+import { PAUSE, TRIG, pickMenu } from "./basicKit";
 
 export const POLITRI_NAME = "POLITRI";
 
@@ -21,25 +21,23 @@ const row = (r: number, label: string, v: string, col = 10): string[] => [
 
 export const POLITRI_LINES = [
   "While 1=1",
-  "ClrText",
-  'Locate 1,1,"POLIARMONICAS 3F"',
-  'Locate 1,2,"1 EQUILIBRADA"',
-  'Locate 1,3,"2 DESEQUILIBRADA"',
-  '"NRO 0 SALIR"?→U',
+  ...pickMenu({ title: "POLIARMONICAS 3F", items: ["EQUILIBRADA", "DESEQUILIBRADA"], choice: "U" }),
   "If U=0:Then Stop:IfEnd",
   // ---- 1: balanced star
   "If U=1:Then",
-  "ClrText",
-  '"1=PICO 2=EFICAZ"?→V',
+  ...pickMenu({ title: "LOS VALORES SON", items: ["PICO", "EFICACES"], choice: "V" }),
   "1→W",
   "If V=1:Then 1÷√(2)→W:IfEnd",
-  '"I: 1 DADA 2 R L C"?→T',
+  ...pickMenu({ title: "CORRIENTE DE LA CARGA", items: ["DADA (I Y ANGULO)", "R L C POR FASE"], choice: "T", key: "X" }),
+  "If T<1:Then 1→T:IfEnd",
   "1→Z",
   "If T=2:Then",
   '"R OHM"?→R',
   '"XL OHM A F1"?→L',
   '"XC OHM A F1 0=NO"?→C',
-  '"NEUTRO 1=SI 0=NO"?→Z',
+  ...pickMenu({ title: "NEUTRO", items: ["CONECTADO", "DESCONECTADO"], choice: "Z", key: "X" }),
+  "If Z<1:Then 1→Z:IfEnd",
+  "If Z=2:Then 0→Z:IfEnd",
   "IfEnd",
   '"CANT ARMONICAS MAX 7"?→N',
   "If N>7:Then 7→N:IfEnd",
@@ -109,8 +107,7 @@ export const POLITRI_LINES = [
   "IfEnd",
   // ---- 2: three currents of any size (neutral current)
   "If U=2:Then",
-  "ClrText",
-  '"1=PICO 2=EFICAZ"?→V',
+  ...pickMenu({ title: "LOS VALORES SON", items: ["PICO", "EFICACES"], choice: "V" }),
   "1→W",
   "If V=1:Then 1÷√(2)→W:IfEnd",
   '"CANT ARMONICAS MAX 7"?→N',

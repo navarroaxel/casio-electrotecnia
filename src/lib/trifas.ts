@@ -4,7 +4,7 @@
 // (4 wires) or the neutral displacement (3 wires) or the phase currents (delta), P, Q and S, and, for the balanced load
 // measured with wattmeters, P, Q, S from one wattmeter (Q/√3) or from the Aron connection. `solveThreePhase` is the same
 // arithmetic in TypeScript so the tests can compare it with the listing and with the circuit's own laws (KCL, Ohm).
-import { PAUSE, PI, TRIG, atan2Lines, menuLines } from "./basicKit";
+import { PAUSE, PI, TRIG, atan2Lines, menuLines, pickMenu } from "./basicKit";
 
 export const TRIFAS_NAME = "TRIFAS";
 
@@ -75,18 +75,13 @@ const valueRow = (row: number, label: string, v: string): string[] => [
 // power factor with the bank (P does not change); page 2 the bank's line currents I_RC I_SC I_TC.
 const BANK_LINES = [
   "If O=4:Then",
-  "ClrText",
-  'Locate 1,1,"BANCO C EN TRIANGULO"',
-  'Locate 1,2,"1 C CONOCIDO"',
-  'Locate 1,3,"2 COS FI OBJETIVO"',
-  'Locate 1,4,"3 QUITAR BANCO"',
-  '"OPCION 1 A 3"?→X',
+  ...pickMenu({ title: "BANCO C EN TRIANGULO", items: ["C CONOCIDO", "COS FI OBJETIVO", "QUITAR BANCO"], choice: "X" }),
   "If X=3:Then 0→List 10[2]:IfEnd",
   "If X=1:Then",
   "ClrText",
   '"F HZ 0=50"?→F',
   "If F=0:Then 50→F:IfEnd",
-  '"C MICROF"?→C',
+  '"C µF"?→C',
   "1→List 10[2]",
   `2×${PI}×F→List 10[4]`,
   "C÷1000000→List 10[3]",
@@ -125,7 +120,7 @@ const BANK_LINES = [
   "For 1→J To 3",
   ...showPolar("J", "J"),
   "Next",
-  ...valueRow(4, "C UF", "List 10[3]×1000000"),
+  ...valueRow(4, "C µF", "List 10[3]×1000000"),
   ...valueRow(5, "Q VAR", "Q"),
   ...valueRow(6, "S VA", "S"),
   ...valueRow(7, "FP", "N"),
@@ -407,8 +402,9 @@ const MOTOR_AND_PHASES = [
 ];
 
 export const TRIFAS_LINES = [
-  '"0=NUEVO 1=SEGUIR"?→A',
-  "If A=0:Then",
+  ...pickMenu({ title: "DATOS", items: ["NUEVOS", "SEGUIR GUARDADOS"], choice: "A" }),
+  // EXIT is "seguir": it never wipes the stored data
+  "If A=1:Then",
   ...INIT,
   "IfEnd",
   ...[21, 22, 23, 24].map((n) => `{0,0,0,0,0,0,0,0}→List ${n}`),
@@ -433,14 +429,10 @@ export const TRIFAS_LINES = [
   "If O=0:Then Stop:IfEnd",
   // 1: the source: sequence and one voltage as reference
   "If O=1:Then",
-  "ClrText",
-  '"1=RST 2=RTS"?→T',
-  "ClrText",
-  'Locate 1,1,"REFERENCIA:"',
-  'Locate 1,2,"1 URN 2 USN 3 UTN"',
-  'Locate 1,3,"4 URS 5 UST 6 UTR"',
-  'Locate 1,4,"0 URN 220 V 90 GRAD"',
-  '"REFERENCIA 0=DEFECTO"?→R',
+  ...pickMenu({ title: "SECUENCIA", items: ["RST DIRECTA", "RTS INVERSA"], choice: "T" }),
+  // the reference: item 1 is the usual case (U_RN = 220 V at 90°), then the six voltages; EXIT is the usual case too
+  ...pickMenu({ items: ["URN 220V 90 USUAL", "URN", "USN", "UTN", "URS", "UST", "UTR"], choice: "R" }),
+  "R–1→R:If R<0:Then 0→R:IfEnd",
   // the usual case in one key: 0 = U_RN = 220 V at 90° (the guides' U_R); a value of 0 = 220 V (phase) or 380 V (line)
   "0→Y",
   "If R=0:Then 1→R:220→A:90→B:1→Y:IfEnd",
@@ -470,30 +462,17 @@ export const TRIFAS_LINES = [
   "IfEnd",
   // 2: the load
   "If O=2:Then",
-  "ClrText",
-  'Locate 1,1,"CONEXION:"',
-  'Locate 1,2,"1 ESTRELLA 4 HILOS"',
-  'Locate 1,3,"2 ESTRELLA 3 HILOS"',
-  'Locate 1,4,"3 TRIANGULO"',
-  '"CONEXION 1 A 3"?→T',
+  ...pickMenu({ title: "CONEXION", items: ["ESTRELLA 4 HILOS", "ESTRELLA 3 HILOS", "TRIANGULO"], choice: "T" }),
   "If T<1:Then 1→T:IfEnd",
-  "If T>3:Then 3→T:IfEnd",
   "T→List 10[1]",
-  '"SIMETRICA 1=SI 0=NO"?→S',
+  ...pickMenu({ title: "CARGA SIMETRICA?", items: ["SI", "NO"], choice: "S", sel: "L" }),
+  "If S=2:Then 0→S:IfEnd",
   "3→M:If S=1:Then 1→M:IfEnd",
   // how the load is given: its impedance, its apparent power S or its active power P, with the angle φ (inductive > 0). S and P
   // are the total of the three phases when the load is symmetric, of the phase otherwise; the impedance is then
   // |Z| = U²/S_phase with U the voltage on the element (phase voltage, or the line voltage in delta): TENSIONES first
-  "ClrText",
-  'Locate 1,1,"CARGA POR:"',
-  'Locate 1,2,"1 Z OHM"',
-  'Locate 1,3,"2 S VA"',
-  'Locate 1,4,"3 P W"',
-  'Locate 1,5,"4 VARIAS P Y COS FI"',
-  'Locate 1,6,"5 MOTOR Y CARGAS FASE"',
-  '"CARGA POR 1 A 5"?→V',
+  ...pickMenu({ title: "CARGA POR", items: ["Z (OHM)", "S (VA) Y ANGULO", "P (W) Y ANGULO", "VARIAS P Y COS FI", "MOTOR Y FASES"], choice: "V", sel: "L" }),
   "If V<1:Then 1→V:IfEnd",
-  "If V>5:Then 5→V:IfEnd",
   ...MULTI_LOADS,
   ...MOTOR_AND_PHASES,
   "If V<4:Then",
@@ -536,9 +515,7 @@ export const TRIFAS_LINES = [
   "IfEnd",
   // 7: clear everything (asks first)
   "If O=7:Then",
-  "ClrText",
-  'Locate 1,1,"BORRAR TODO?"',
-  '"1=NO 2=SI"?→X',
+  ...pickMenu({ title: "BORRAR TODO?", items: ["NO", "SI, BORRAR"], choice: "X" }),
   "If X=2:Then",
   ...INIT,
   "IfEnd",
@@ -676,17 +653,12 @@ export const TRIFAS_LINES = [
   ...FASORIAL_LINES,
   // 6: wattmeters
   "If O=6:Then",
-  "ClrText",
-  'Locate 1,1,"VATIMETROS"',
-  'Locate 1,2,"1 UN VAT. EQUILIB."',
-  'Locate 1,3,"2 ARON EQUILIBRADA"',
-  'Locate 1,4,"3 2 VAT. CARGA REAL"',
-  '"OPCION 1 A 3"?→X',
+  ...pickMenu({ title: "VATIMETROS", items: ["UN VAT. EQUILIB.", "ARON EQUILIBRADA", "VAT. CARGA REAL"], choice: "X" }),
   // the two wattmeters of the exercises on the load as it is (and ahead of the bank if one is connected): the ones whose
   // current coils are in two lines and whose voltage coils go to the third (common) line
   "If X=3:Then",
-  "ClrText",
-  '"COMUN 1R 2S 3T"?→C',
+  ...pickMenu({ title: "LINEA COMUN", items: ["R", "S", "T"], choice: "C" }),
+  "If C<1:Then 3→C:IfEnd",
   "If C=1:Then 2→A:3→B:IfEnd",
   "If C=2:Then 1→A:3→B:IfEnd",
   "If C=3:Then 1→A:2→B:IfEnd",
@@ -714,7 +686,7 @@ export const TRIFAS_LINES = [
   "List 1[1]–List 1[2]→D:List 2[1]–List 2[2]→E:√(D×D+E×E)→A",
   "IfEnd",
   "If Y=0:Then",
-  '"1=LINEA 2=FASE"?→T',
+  ...pickMenu({ title: "LA TENSION ES DE", items: ["LINEA", "FASE"], choice: "T", flag: "N" }),
   "If T=2:Then A×√(3)→A:IfEnd",
   "IfEnd",
   '"I A 0=DE RESOLVER"?→B',

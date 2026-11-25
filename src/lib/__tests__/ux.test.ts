@@ -2,6 +2,7 @@ import { newGfx, newMem, runBasic, type Gfx } from "./casioBasic";
 import { POLIARM_LINES } from "../poliarm";
 import { POLITRI_LINES } from "../politri";
 import { TRIFAS_LINES } from "../trifas";
+import { banco, carga, cargaZ, exit, flow, go, nuevo, solve, tens, vatim, type Flow } from "./flows";
 
 // Screens the user reads: the "EXE" in the corner of the last line (columns 19-21) must not sit on top of anything, and no
 // text may run off the 21 columns. Every result screen of the three programs is checked, in the typical flows.
@@ -22,22 +23,22 @@ const run = (lines: string[], inputs: number[], keys?: number[]) => {
   runBasic(lines, inputs, g, newMem(), keys);
   return g;
 };
-const K = { TENS: 72, CARGA: 62, SOLVE: 52, BANCO: 73, FASOR: 63, VATIM: 53, EXIT: 71 };
-const FIG = [0, 1, 0, 1, 1, 2, 100000, 60]; // TENSIONES default, star with neutral, symmetric, 100 kVA at 60°
+const FIG = flow(nuevo(), tens(), carga(1, true, 2, [100000, 60])); // TENSIONES usual, star with neutral, symmetric, 100 kVA at 60°
 
 describe("the result screens say EXE and nothing is under it", () => {
   test("TRIFAS: RESOLVER (5 screens, star without neutral), the bank, the wattmeters, the loads", () => {
-    const flows: [number[], number[]][] = [
-      [[0, 1, 0, 2, 0, 1, 10, 0, 15, 30, 10, -30], [K.TENS, K.CARGA, K.SOLVE, K.EXIT]],
-      [[0, 1, 0, 3, 0, 1, 10, 0, 15, 30, 10, -30], [K.TENS, K.CARGA, K.SOLVE, K.EXIT]],
-      [[...FIG, 2, 0, 1, 3, 2], [K.TENS, K.CARGA, K.SOLVE, K.BANCO, K.VATIM, K.EXIT]],
-      [[0, 1, 220, 2, 10, 2193.93], [K.VATIM, K.EXIT]], // one wattmeter
-      [[0, 2, 1000, 500], [K.VATIM, K.EXIT]], // Aron
-      [[0, 1, 0, 1, 1, 4, 2, 40, 0.8, 1.8, 1], [K.TENS, K.CARGA, K.EXIT]], // several loads
-      [[0, 1, 0, 1, 0, 5, 60, 0.85, 24, 1, 15, 1, 9, 1], [K.TENS, K.CARGA, K.SOLVE, K.EXIT]], // 615
+    const Z3: [number, number][] = [[10, 0], [15, 30], [10, -30]];
+    const flows: Flow[] = [
+      flow(nuevo(), tens(), cargaZ(2, Z3), solve(), exit()), // star without neutral
+      flow(nuevo(), tens(), cargaZ(3, Z3), solve(), exit()), // delta
+      flow(FIG, solve(), banco(2, [0, 1]), vatim(3, [2]), exit()), // the bank and the wattmeters
+      flow(nuevo(), vatim(1, [2], [220, 10, 2193.93]), exit()), // one wattmeter
+      flow(nuevo(), vatim(2, [], [1000, 500]), exit()), // Aron
+      flow(nuevo(), tens(), carga(1, true, 4, [2, 40, 0.8, 1.8, 1]), exit()), // several loads
+      flow(nuevo(), tens(), carga(1, false, 5, [60, 0.85, 24, 1, 15, 1, 9, 1]), solve(), exit()), // 615
     ];
     let hints = 0;
-    for (const [inputs, keys] of flows) hints += check(run(TRIFAS_LINES, inputs, keys));
+    for (const f of flows) hints += check(go(TRIFAS_LINES, f));
     expect(hints).toBeGreaterThan(12);
   });
   test("POLITRI: both modes", () => {
@@ -48,7 +49,7 @@ describe("the result screens say EXE and nothing is under it", () => {
   test("POLIARM: the results screens", () => {
     const ARM = [1, 50, 3, 1, 311, 0, 42.42, 0, 2, 0, 35.35, -30, 3, 0, 14.142, 60];
     const RAM = [2, 10, 17.32, 0, 20, 0, 0];
-    const g = run(POLIARM_LINES, [0, ...ARM, ...RAM, 100], [72, 62, 73, 71]);
+    const g = run(POLIARM_LINES, [...ARM, ...RAM, 100], [72, 72, 62, 73, 71]); // NUEVOS, then the menu
     expect(check(g)).toBeGreaterThan(0);
   });
 });

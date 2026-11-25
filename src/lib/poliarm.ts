@@ -8,7 +8,7 @@
 
 // ---- the listing -------------------------------------------------------------------------------------------------
 
-import { PAUSE, TRIG, TWO_PI, menuLines } from "./basicKit";
+import { PAUSE, TRIG, TWO_PI, menuLines, pickMenu } from "./basicKit";
 
 const INIT = [
   "{0,0,0,0,0,0,0}→List 1",
@@ -29,8 +29,9 @@ export const POLIARM_NAME = "POLIARM";
 // 6 / 7 / 8 = R, XL, XC at the fundamental of up to 3 linear branches; List 9 = results; List 10 = {harmonics, branches, f,
 // % to compensate, factor peak→rms, …}. They persist: 0 = new the first time, 1 = go on.
 export const POLIARM_LINES = [
-  '"0=NUEVO 1=SEGUIR"?→A',
-  "If A=0:Then",
+  ...pickMenu({ title: "DATOS", items: ["NUEVOS", "SEGUIR GUARDADOS"], choice: "A" }),
+  // EXIT is "seguir": it never wipes the stored data
+  "If A=1:Then",
   ...INIT,
   "IfEnd",
   "While 1=1",
@@ -205,7 +206,7 @@ export const POLIARM_LINES = [
   'Locate 1,2,"I FUND A":Locate 11,2,√(F)',
   'Locate 1,3,"THD U %":Locate 11,3,J',
   "If O=4:Then",
-  'Locate 1,4,"C UF":Locate 11,4,List 9[20]',
+  'Locate 1,4,"C µF":Locate 11,4,List 9[20]',
   'Locate 1,5,"XC OHM":Locate 11,5,V',
   "IfEnd",
   ...PAUSE,

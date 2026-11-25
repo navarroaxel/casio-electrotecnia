@@ -105,3 +105,21 @@ export const atan2Lines = (re: string, im: string, mag: string, ang: string): st
     "IfEnd",
   ];
 };
+
+// A submenu like the main one: ▲ ▼ move the > marker, EXE chooses, the number key of an item chooses it at once, EXIT or 0 leaves
+// with 0. `items` are at most 17 characters (column 3, the digit mark, 21 columns); `title` goes on the first line. Returns the
+// number of the item in `choice`. Scratch variables `sel`, `key`, `flag`: pick ones that are free where the menu is used.
+export const pickMenu = (o: { title?: string; items: string[]; choice: string; sel?: string; key?: string; flag?: string }): string[] => {
+  const row0 = o.title ? 2 : 1;
+  for (const t of o.items) if (t.length > 17) throw new Error(`menu item too long (${t.length} > 17): ${t}`);
+  return menuLines({
+    count: o.items.length,
+    exit: "zero",
+    choice: o.choice,
+    flag: o.flag ?? "Y",
+    sel: o.sel ?? "S",
+    key: o.key ?? "W",
+    row0,
+    draw: [...(o.title ? [`Locate 1,1,"${o.title}"`] : []), ...o.items.map((t, i) => `Locate 3,${row0 + i},"${t}"`)],
+  });
+};

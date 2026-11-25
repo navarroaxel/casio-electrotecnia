@@ -121,7 +121,7 @@ describe("POLITRI listing run by the interpreter", () => {
   });
   test("706 (balanced, R and L, neutral connected and disconnected)", () => {
     for (const neutral of [1, 0]) {
-      const g = run([1, 2, 2, LOAD706.R, LOAD706.XL, LOAD706.XC, neutral, 5, ...EX706.flatMap((h) => [h.n, h.U, h.phiU])]);
+      const g = run([1, 2, 2, LOAD706.R, LOAD706.XL, LOAD706.XC, neutral ? 1 : 2 /* NEUTRO menu: 1 connected, 2 disconnected */, 5, ...EX706.flatMap((h) => [h.n, h.U, h.phiU])]);
       const m = politriBalanced({ peak: false, harmonics: EX706, load: LOAD706, neutral: !!neutral });
       within(rowOf(g, "I LINEA")![1], m.IL);
       within(rowOf(g, "I NEUTRO")![1], m.IN);

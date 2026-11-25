@@ -1,5 +1,28 @@
-"0=NUEVO 1=SEGUIR"?→A
-If A=0:Then
+1→S:1→Y
+ClrText
+Locate 1,1,"DATOS"
+Locate 3,2,"NUEVOS¹"
+Locate 3,3,"SEGUIR GUARDADOS²"
+While Y=1
+Locate 1,2," ":Locate 1,3," "
+Locate 1,S+1,">"
+While Getkey>0:WhileEnd
+0→W
+While W=0
+Getkey→W
+WhileEnd
+If W=28:Then S–1→S:IfEnd
+If W=37:Then S+1→S:IfEnd
+If S<1:Then 2→S:IfEnd
+If S>2:Then 1→S:IfEnd
+If W=31:Then 0→Y:IfEnd
+If W=72:Then 1→S:0→Y:IfEnd
+If W=62:Then 2→S:0→Y:IfEnd
+If W=71:Then 0→S:0→Y:IfEnd
+If W=47:Then 0→S:0→Y:IfEnd
+WhileEnd
+S→A
+If A=1:Then
 {0,0,0,0,0,0,0}→List 1
 {0,0,0,0,0,0,0}→List 2
 {0,0,0,0,0,0,0}→List 3
@@ -271,7 +294,7 @@ Locate 1,1,"U EF V":Locate 11,1,√(M)
 Locate 1,2,"I FUND A":Locate 11,2,√(F)
 Locate 1,3,"THD U %":Locate 11,3,J
 If O=4:Then
-Locate 1,4,"C UF":Locate 11,4,List 9[20]
+Locate 1,4,"C µF":Locate 11,4,List 9[20]
 Locate 1,5,"XC OHM":Locate 11,5,V
 IfEnd
 Locate 19,7,"EXE"
