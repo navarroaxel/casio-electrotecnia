@@ -346,7 +346,7 @@ describe("BANCO C and VATIMETROS (two wattmeters on the real load) from the list
     close(row(g, "WTS")![1], 50000, 1);
   });
   test("BANCO C before RESOLVER says so instead of showing zeros", () => {
-    const g = go(TRIFAS_LINES, flow(nuevo(), tens(), cargaZ(1, [[10, 0], [10, 0], [10, 0]]), press(73, 31), exit()));
+    const g = go(TRIFAS_LINES, flow(nuevo(), tens(), cargaZ(1, [[10, 0], [10, 0], [10, 0]]), press(73), exit()));
     expect(g.screens.some((sc) => sc.some((x) => x[2] === "PRIMERO RESOLVER"))).toBe(true);
   });
   test("QUITAR BANCO takes the third screen away", () => {

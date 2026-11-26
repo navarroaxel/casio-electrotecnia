@@ -229,7 +229,7 @@ export const FASORIAL_LINES = [
   "1→Q",
   "While Q=1",
   "Cls",
-  "ViewWindow V–2×W,V+2×W,1,S–W,S+W,1",
+  "ViewWindow V–2×W,V+2×W,1000000,S–W,S+W,1000000",
   "For 1→K To N",
   "List 11[K]→A:List 12[K]→B:List 13[K]→X:List 14[K]→Y",
   "F-Line A,B,X,Y",
@@ -242,6 +242,7 @@ export const FASORIAL_LINES = [
   "X+2.2×C→G:Y+2.2×D→H",
   // the bank's current is labelled halfway along its arrow, not at the tip it shares with I_L
   "If Z=3:Then If K>3:Then If K<7:Then (A+X)÷2→G:(B+Y)÷2→H:IfEnd:IfEnd:IfEnd",
+  "If Abs (G–V)<2.1×W:Then If Abs (H–S)<1.1×W:Then",
   ...pixelOf("G", "H"),
   ...([1, 2, 3] as const).flatMap((z) => {
     const names = LABELS[z];
@@ -259,6 +260,7 @@ export const FASORIAL_LINES = [
       "IfEnd",
     ];
   }),
+  "IfEnd:IfEnd",
   "IfEnd",
   "Next",
   "PlotOn 0,0",
@@ -284,7 +286,9 @@ export const FASORIAL_LINES = [
   "Getkey→F",
   "WhileEnd",
   "If F=42:Then W÷1.5→W:IfEnd",
+  "If F=79:Then W÷1.5→W:IfEnd",
   "If F=32:Then W×1.5→W:IfEnd",
+  "If F=69:Then W×1.5→W:IfEnd",
   "If F=28:Then S+0.5×W→S:IfEnd",
   "If F=37:Then S–0.5×W→S:IfEnd",
   "If F=38:Then V–W→V:IfEnd",
