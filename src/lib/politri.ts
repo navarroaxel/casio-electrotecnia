@@ -52,7 +52,8 @@ export const POLITRI_LINES = [
   '"ORDEN"?→A',
   '"U V"?→J',
   "J×W→J",
-  '"U ANGULO GRADOS"?→B',
+  "0→B",
+  'If J>0:Then "U ANGULO GRADOS"?→B:IfEnd',
   // a triple harmonic: 1 in S
   "0→S",
   "If Abs (A÷3–Intg (A÷3+0.5))<0.001:Then 1→S:IfEnd",

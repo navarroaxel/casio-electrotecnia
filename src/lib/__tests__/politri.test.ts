@@ -109,7 +109,7 @@ describe("POLITRI listing run by the interpreter", () => {
   };
 
   test("704 (balanced, currents given, peaks)", () => {
-    const g = run([1, 1, 1, 5, ...EX704.flatMap((h) => [h.n, h.U, h.phiU, h.I!, h.phiI!])]);
+    const g = run([1, 1, 1, 5, ...EX704.flatMap((h) => [h.n, h.U, ...(h.U > 0 ? [h.phiU] : []), h.I!, h.phiI!])]);
     const m = politriBalanced({ peak: true, harmonics: EX704, neutral: true });
     within(rowOf(g, "I LINEA")![1], m.IL);
     within(rowOf(g, "I NEUTRO")![1], m.IN);
@@ -121,7 +121,7 @@ describe("POLITRI listing run by the interpreter", () => {
   });
   test("706 (balanced, R and L, neutral connected and disconnected)", () => {
     for (const neutral of [1, 0]) {
-      const g = run([1, 2, 2, LOAD706.R, LOAD706.XL, LOAD706.XC, neutral ? 1 : 2 /* NEUTRO menu: 1 connected, 2 disconnected */, 5, ...EX706.flatMap((h) => [h.n, h.U, h.phiU])]);
+      const g = run([1, 2, 2, LOAD706.R, LOAD706.XL, LOAD706.XC, neutral ? 1 : 2 /* NEUTRO menu: 1 connected, 2 disconnected */, 5, ...EX706.flatMap((h) => [h.n, h.U, ...(h.U > 0 ? [h.phiU] : [])])]);
       const m = politriBalanced({ peak: false, harmonics: EX706, load: LOAD706, neutral: !!neutral });
       within(rowOf(g, "I LINEA")![1], m.IL);
       within(rowOf(g, "I NEUTRO")![1], m.IN);
