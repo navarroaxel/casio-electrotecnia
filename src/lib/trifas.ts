@@ -299,8 +299,6 @@ const MULTI_LOADS = [
   "ClrText",
   'Locate 1,1,"CARGA"',
   "Locate 8,1,K",
-  'Locate 1,2,"TRIFASICA: P TOTAL"',
-  'Locate 1,3,"DE LAS 3 FASES"',
   '"P 3F W"?→A',
   '"COS FI NEG=CAPACIT"?→B',
   "Abs (B)→C",
