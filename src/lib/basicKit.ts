@@ -58,53 +58,28 @@ export const PAUSE = ['Locate 19,7,"EXE"', "While Getkey>0:WhileEnd", "While Get
 export const PI = "3.14159265358979";
 export const TWO_PI = "6.28318530717959";
 
-// cos and sen of the angle in B (degrees) → C = cos, D = sen, with the angle in radians in E and its square in F. Taylor
-// series (Horner) after bringing the angle into −π…π: it does not depend on the calculator's angle unit (Deg / Rad), which a
-// program cannot rely on. Error < 1e-10 on the whole range.
-// Horner's form 1 − x/(a(a+1))·(1 − x/(b(b+1))·(…)) written one operation per line, innermost first, into the variable `into`:
-// a single nested expression (11 levels for the cosine) makes the calculator stop with "Stack ERROR" (its stacks hold 10
-// numeric values and 26 commands), and the manual's remedy is to divide the formula into parts. a = first, first+2, …
-export const hornerLines = (x: string, first: number, count: number, into: string): string[] => {
-  const den = (k: number) => (first + 2 * k) * (first + 2 * k + 1);
-  const out = [`1–${x}÷${den(count - 1)}→${into}`];
-  for (let k = count - 2; k >= 0; k--) out.push(`1–${x}÷${den(k)}×${into}→${into}`);
-  return out;
-};
-export const TRIG = [
-  `B×${PI}÷180→E`,
-  `E–${TWO_PI}×Intg (E÷${TWO_PI}+0.5)→E`,
-  "E×E→F",
-  ...hornerLines("F", 1, 11, "C"),
-  ...hornerLines("F", 2, 10, "D"),
-  "E×D→D",
+// cos and sen of the angle in B (degrees) → C = cos, D = sen, with the angle in the calculator's own unit in E. The unit (Deg /
+// Rad / Gra) is whatever the calculator is set to and a program cannot rely on it, so the angle is scaled by tan⁻¹ 1 ÷ 45 (45 in
+// Deg, π/4 in Rad, 50 in Gra): the factor is 1 in Deg and the right one in the others.
+export const TRIG = ["B×tan⁻¹ (1)÷45→E", "cos (E)→C", "sin (E)→D"];
+
+// Polar form of the phasor (re, im): magnitude → `mag`, angle in degrees (−180…180] → `ang`, the quadrant fixed by hand;
+// scratch letters C D E F G. tan⁻¹ answers in the calculator's unit, hence the ×45÷tan⁻¹ 1 (the same trick as above).
+export const atan2Lines = (re: string, im: string, mag: string, ang: string): string[] => [
+  `${re}→C:${im}→D`,
+  `√(C×C+D×D)→${mag}`,
+  `0→${ang}`,
+  `If ${mag}>0:Then`,
+  "Abs (D)→E:Abs (C)→F",
+  "If E>F:Then E→G:F→E:G→F:IfEnd",
+  "E÷F→G",
+  "tan⁻¹ (G)×45÷tan⁻¹ (1)→G",
+  "If Abs (D)>Abs (C):Then 90–G→G:IfEnd",
+  "If C<0:Then 180–G→G:IfEnd",
+  "If D<0:Then –G→G:IfEnd",
+  `G→${ang}`,
+  "IfEnd",
 ];
-
-
-// Polar form of the phasor (re, im): magnitude → `mag`, angle in degrees (−180…180] → `ang`. Arctangent by two angle halvings
-// and a Taylor series, with the quadrant fixed by hand; scratch letters C D E F G H. Error < 1e-9 degrees.
-export const atan2Lines = (re: string, im: string, mag: string, ang: string): string[] => {
-  // the series 1/3 − H·(1/5 − H·(1/7 − …)) one line at a time in E (free once G = E/F is known), for the same reason as above
-  const series = ["1÷15→E", ...[13, 11, 9, 7, 5, 3].map((d) => `1÷${d}–H×E→E`)];
-  return [
-    `${re}→C:${im}→D`,
-    `√(C×C+D×D)→${mag}`,
-    `0→${ang}`,
-    `If ${mag}>0:Then`,
-    "Abs (D)→E:Abs (C)→F",
-    "If E>F:Then E→G:F→E:G→F:IfEnd",
-    "E÷F→G",
-    "G÷(1+√(1+G×G))→G",
-    "G÷(1+√(1+G×G))→G",
-    "G×G→H",
-    ...series,
-    "G×(1–H×E)×4→G",
-    "If Abs (D)>Abs (C):Then 1.5707963267949–G→G:IfEnd",
-    `If C<0:Then ${PI}–G→G:IfEnd`,
-    "If D<0:Then –G→G:IfEnd",
-    `G×180÷${PI}→${ang}`,
-    "IfEnd",
-  ];
-};
 
 // A submenu like the main one: ▲ ▼ move the > marker, EXE chooses, the number key of an item chooses it at once, EXIT or 0 leaves
 // with 0. `items` are at most 17 characters (column 3, the digit mark, 21 columns); `title` goes on the first line. Returns the

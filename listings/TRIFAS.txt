@@ -160,31 +160,9 @@ For 1→K To 3
 G→B
 If K=2:Then G–120×H→B:IfEnd
 If K=3:Then G+120×H→B:IfEnd
-B×3.14159265358979÷180→E
-E–6.28318530717959×Intg (E÷6.28318530717959+0.5)→E
-E×E→F
-1–F÷462→C
-1–F÷380×C→C
-1–F÷306×C→C
-1–F÷240×C→C
-1–F÷182×C→C
-1–F÷132×C→C
-1–F÷90×C→C
-1–F÷56×C→C
-1–F÷30×C→C
-1–F÷12×C→C
-1–F÷2×C→C
-1–F÷420→D
-1–F÷342×D→D
-1–F÷272×D→D
-1–F÷210×D→D
-1–F÷156×D→D
-1–F÷110×D→D
-1–F÷72×D→D
-1–F÷42×D→D
-1–F÷20×D→D
-1–F÷6×D→D
-E×D→D
+B×tan⁻¹ (1)÷45→E
+cos (E)→C
+sin (E)→D
 A×C→List 1[K]:A×D→List 2[K]
 Next
 IfEnd
@@ -232,21 +210,11 @@ If X>0:Then
 Abs (D)→E:Abs (C)→F
 If E>F:Then E→G:F→E:G→F:IfEnd
 E÷F→G
-G÷(1+√(1+G×G))→G
-G÷(1+√(1+G×G))→G
-G×G→H
-1÷15→E
-1÷13–H×E→E
-1÷11–H×E→E
-1÷9–H×E→E
-1÷7–H×E→E
-1÷5–H×E→E
-1÷3–H×E→E
-G×(1–H×E)×4→G
-If Abs (D)>Abs (C):Then 1.5707963267949–G→G:IfEnd
-If C<0:Then 3.14159265358979–G→G:IfEnd
+tan⁻¹ (G)×45÷tan⁻¹ (1)→G
+If Abs (D)>Abs (C):Then 90–G→G:IfEnd
+If C<0:Then 180–G→G:IfEnd
 If D<0:Then –G→G:IfEnd
-G×180÷3.14159265358979→Y
+G→Y
 IfEnd
 X→List 23[J]:Y→List 24[J]
 Next
@@ -256,6 +224,7 @@ If T=3:Then Locate 1,1,"ZRS":Locate 1,2,"ZST":Locate 1,3,"ZTR":IfEnd
 For 1→J To 3
 Locate 5,J,Intg (List 23[J]×100+0.5)÷100
 Locate 13,J,Intg (List 24[J]×100+0.5)÷100
+Locate 12,J,"∠"
 Next
 If T=1:Then Locate 1,5,"ESTRELLA 4 HILOS":IfEnd
 If T=2:Then Locate 1,5,"ESTRELLA 3 HILOS":IfEnd
@@ -355,10 +324,11 @@ If N>3:Then 3→N:IfEnd
 For 1→K To N
 ClrText
 Locate 1,1,"CARGA"
-Locate 7,1,K
-"P KW"?→A
+Locate 8,1,K
+Locate 1,2,"TRIFASICA: P TOTAL"
+Locate 1,3,"DE LAS 3 FASES"
+"P 3F W"?→A
 "COS FI NEG=CAPACIT"?→B
-A×1000→A
 Abs (B)→C
 If C>1:Then 1→C:IfEnd
 If C<0.001:Then 0.001→C:IfEnd
@@ -393,8 +363,8 @@ ClrText
 Locate 1,1,"MOTOR TRIFASICO"
 Locate 1,2,"SE REPARTE POR IGUAL"
 Locate 1,3,"EN LAS 3 FASES"
-"P MOTOR 3F KW 0=NO"?→A
-A×1000÷3→P:0→Q
+"P MOTOR 3F W 0=NO"?→A
+A÷3→P:0→Q
 If A>0:Then
 "COS FI NEG=CAPACIT"?→B
 Abs (B)→C
@@ -418,12 +388,12 @@ If K=3:Then Locate 1,1,"CARGA ENTRE T Y R":IfEnd
 IfEnd
 Locate 1,2,"SOLO ESA FASE, SIN"
 Locate 1,3,"CONTAR EL MOTOR"
-If T<3:Then If K=1:Then "P FASE R KW 0=NO"?→A:IfEnd:IfEnd
-If T=3:Then If K=1:Then "P R Y S KW 0=NO"?→A:IfEnd:IfEnd
-If T<3:Then If K=2:Then "P FASE S KW 0=NO"?→A:IfEnd:IfEnd
-If T=3:Then If K=2:Then "P S Y T KW 0=NO"?→A:IfEnd:IfEnd
-If T<3:Then If K=3:Then "P FASE T KW 0=NO"?→A:IfEnd:IfEnd
-If T=3:Then If K=3:Then "P T Y R KW 0=NO"?→A:IfEnd:IfEnd
+If T<3:Then If K=1:Then "P FASE R W 0=NO"?→A:IfEnd:IfEnd
+If T=3:Then If K=1:Then "P R Y S W 0=NO"?→A:IfEnd:IfEnd
+If T<3:Then If K=2:Then "P FASE S W 0=NO"?→A:IfEnd:IfEnd
+If T=3:Then If K=2:Then "P S Y T W 0=NO"?→A:IfEnd:IfEnd
+If T<3:Then If K=3:Then "P FASE T W 0=NO"?→A:IfEnd:IfEnd
+If T=3:Then If K=3:Then "P T Y R W 0=NO"?→A:IfEnd:IfEnd
 P→G:Q→H
 If A>0:Then
 If T<3:Then If K=1:Then "COS FI R NEG=CAPACIT"?→B:IfEnd:IfEnd
@@ -432,7 +402,6 @@ If T<3:Then If K=2:Then "COS FI S NEG=CAPACIT"?→B:IfEnd:IfEnd
 If T=3:Then If K=2:Then "COSFI ST NEG=CAPACIT"?→B:IfEnd:IfEnd
 If T<3:Then If K=3:Then "COS FI T NEG=CAPACIT"?→B:IfEnd:IfEnd
 If T=3:Then If K=3:Then "COSFI TR NEG=CAPACIT"?→B:IfEnd:IfEnd
-A×1000→A
 Abs (B)→C
 If C>1:Then 1→C:IfEnd
 If C<0.001:Then 0.001→C:IfEnd
@@ -470,31 +439,9 @@ If V=1:Then "MODULO OHM"?→A:IfEnd
 If V=2:Then "S VA"?→A:IfEnd
 If V=3:Then "P W"?→A:IfEnd
 "ANGULO GRADOS"?→B
-B×3.14159265358979÷180→E
-E–6.28318530717959×Intg (E÷6.28318530717959+0.5)→E
-E×E→F
-1–F÷462→C
-1–F÷380×C→C
-1–F÷306×C→C
-1–F÷240×C→C
-1–F÷182×C→C
-1–F÷132×C→C
-1–F÷90×C→C
-1–F÷56×C→C
-1–F÷30×C→C
-1–F÷12×C→C
-1–F÷2×C→C
-1–F÷420→D
-1–F÷342×D→D
-1–F÷272×D→D
-1–F÷210×D→D
-1–F÷156×D→D
-1–F÷110×D→D
-1–F÷72×D→D
-1–F÷42×D→D
-1–F÷20×D→D
-1–F÷6×D→D
-E×D→D
+B×tan⁻¹ (1)÷45→E
+cos (E)→C
+sin (E)→D
 If V>1:Then
 If V=3:Then If C>0.000001:Then A÷C→A:IfEnd:IfEnd
 If S=1:Then A÷3→A:IfEnd
@@ -635,21 +582,11 @@ If X>0:Then
 Abs (D)→E:Abs (C)→F
 If E>F:Then E→G:F→E:G→F:IfEnd
 E÷F→G
-G÷(1+√(1+G×G))→G
-G÷(1+√(1+G×G))→G
-G×G→H
-1÷15→E
-1÷13–H×E→E
-1÷11–H×E→E
-1÷9–H×E→E
-1÷7–H×E→E
-1÷5–H×E→E
-1÷3–H×E→E
-G×(1–H×E)×4→G
-If Abs (D)>Abs (C):Then 1.5707963267949–G→G:IfEnd
-If C<0:Then 3.14159265358979–G→G:IfEnd
+tan⁻¹ (G)×45÷tan⁻¹ (1)→G
+If Abs (D)>Abs (C):Then 90–G→G:IfEnd
+If C<0:Then 180–G→G:IfEnd
 If D<0:Then –G→G:IfEnd
-G×180÷3.14159265358979→Y
+G→Y
 IfEnd
 X→List 23[J]:Y→List 24[J]
 Next
@@ -658,12 +595,14 @@ Locate 1,1,"IR":Locate 1,2,"IS":Locate 1,3,"IT"
 For 1→J To 3
 Locate 5,J,Intg (List 23[J]×100+0.5)÷100
 Locate 13,J,Intg (List 24[J]×100+0.5)÷100
+Locate 12,J,"∠"
 Next
 If T=1:Then Locate 1,4,"IN":IfEnd
 If T=2:Then Locate 1,4,"UNN":IfEnd
 If T<3:Then
 Locate 5,4,Intg (List 23[4]×100+0.5)÷100
 Locate 13,4,Intg (List 24[4]×100+0.5)÷100
+Locate 12,4,"∠"
 IfEnd
 Locate 1,5,"P W"
 Locate 7,5,Intg (List 9[1]×100+0.5)÷100
@@ -681,6 +620,7 @@ If T=3:Then Locate 1,1,"IRS":Locate 1,2,"IST":Locate 1,3,"ITR":IfEnd
 For 1→J To 3
 Locate 5,J,Intg (List 23[J+4]×100+0.5)÷100
 Locate 13,J,Intg (List 24[J+4]×100+0.5)÷100
+Locate 12,J,"∠"
 Next
 Locate 19,7,"EXE"
 While Getkey>0:WhileEnd
@@ -770,17 +710,13 @@ S→X
 If X=3:Then 0→List 10[2]:IfEnd
 If X=1:Then
 ClrText
-"F HZ 0=50"?→F
-If F=0:Then 50→F:IfEnd
 "C µF"?→C
 1→List 10[2]
-2×3.14159265358979×F→List 10[4]
+314.159265358979→List 10[4]
 C÷1000000→List 10[3]
 IfEnd
 If X=2:Then
 ClrText
-"F HZ 0=50"?→F
-If F=0:Then 50→F:IfEnd
 "COS FI OBJETIVO"?→C
 If C>1:Then 1→C:IfEnd
 If C<0.001:Then 0.001→C:IfEnd
@@ -789,7 +725,7 @@ List 1[1]–List 1[2]→A:List 2[1]–List 2[2]→B:A×A+B×B→D
 List 9[2]–List 9[1]×E→G
 If G<0:Then 0→G:IfEnd
 1→List 10[2]
-2×3.14159265358979×F→List 10[4]
+314.159265358979→List 10[4]
 0→List 10[3]
 If D>0:Then G÷(3×List 10[4]×D)→List 10[3]:IfEnd
 IfEnd
@@ -823,21 +759,11 @@ If X>0:Then
 Abs (D)→E:Abs (C)→F
 If E>F:Then E→G:F→E:G→F:IfEnd
 E÷F→G
-G÷(1+√(1+G×G))→G
-G÷(1+√(1+G×G))→G
-G×G→H
-1÷15→E
-1÷13–H×E→E
-1÷11–H×E→E
-1÷9–H×E→E
-1÷7–H×E→E
-1÷5–H×E→E
-1÷3–H×E→E
-G×(1–H×E)×4→G
-If Abs (D)>Abs (C):Then 1.5707963267949–G→G:IfEnd
-If C<0:Then 3.14159265358979–G→G:IfEnd
+tan⁻¹ (G)×45÷tan⁻¹ (1)→G
+If Abs (D)>Abs (C):Then 90–G→G:IfEnd
+If C<0:Then 180–G→G:IfEnd
 If D<0:Then –G→G:IfEnd
-G×180÷3.14159265358979→Y
+G→Y
 IfEnd
 X→List 23[J]:Y→List 24[J]
 Next
@@ -846,6 +772,7 @@ Locate 1,1,"ILR":Locate 1,2,"ILS":Locate 1,3,"ILT"
 For 1→J To 3
 Locate 5,J,Intg (List 23[J]×100+0.5)÷100
 Locate 13,J,Intg (List 24[J]×100+0.5)÷100
+Locate 12,J,"∠"
 Next
 Locate 1,4,"C µF"
 Locate 7,4,Intg (List 10[3]×1000000×100+0.5)÷100
@@ -863,6 +790,7 @@ Locate 1,1,"IRC":Locate 1,2,"ISC":Locate 1,3,"ITC"
 For 1→J To 3
 Locate 5,J,Intg (List 23[J+3]×100+0.5)÷100
 Locate 13,J,Intg (List 24[J+3]×100+0.5)÷100
+Locate 12,J,"∠"
 Next
 Locate 19,7,"EXE"
 While Getkey>0:WhileEnd
@@ -930,8 +858,6 @@ If M=0:Then 1→M:IfEnd
 (P–L)÷2→W:(J–I)÷4→D:If D>W:Then D→W:IfEnd
 If W=0:Then M→W:IfEnd
 1.2×W→W
-1→Q
-While Q=1
 Cls
 ViewWindow V–2×W,V+2×W,1000000,S–W,S+W,1000000
 For 1→K To N
@@ -945,7 +871,6 @@ F-Line X,Y,X–(C×0.9063–D×0.4226),Y–(C×0.4226+D×0.9063)
 F-Line X,Y,X–(C×0.9063+D×0.4226),Y–(D×0.9063–C×0.4226)
 X+2.2×C→G:Y+2.2×D→H
 If Z=3:Then If K>3:Then If K<7:Then (A+X)÷2→G:(B+Y)÷2→H:IfEnd:IfEnd:IfEnd
-If Abs (G–V)<2.1×W:Then If Abs (H–S)<1.1×W:Then
 Intg ((S+W–H)÷(2×W)×63)–2→R
 If R<1:Then 1→R:IfEnd
 If R>57:Then 57→R:IfEnd
@@ -977,7 +902,6 @@ If K=7:Then Text R,C,"ILR":IfEnd
 If K=8:Then Text R,C,"ILS":IfEnd
 If K=9:Then Text R,C,"ILT":IfEnd
 IfEnd
-IfEnd:IfEnd
 IfEnd
 Next
 PlotOn 0,0
@@ -1008,21 +932,7 @@ If Z>1:Then Text 57,1,"I MAX":IfEnd
 Text 57,30,Intg (M×10+0.5)÷10
 Text 57,100,"EXE"
 While Getkey>0:WhileEnd
-0→F
-While F=0
-Getkey→F
-WhileEnd
-If F=42:Then W÷1.5→W:IfEnd
-If F=79:Then W÷1.5→W:IfEnd
-If F=32:Then W×1.5→W:IfEnd
-If F=69:Then W×1.5→W:IfEnd
-If F=28:Then S+0.5×W→S:IfEnd
-If F=37:Then S–0.5×W→S:IfEnd
-If F=38:Then V–W→V:IfEnd
-If F=27:Then V+W→V:IfEnd
-If F=31:Then 0→Q:IfEnd
-If F=47:Then 0→Q:IfEnd
-WhileEnd
+While Getkey=0:WhileEnd
 Next
 IfEnd
 If O=6:Then
@@ -1159,21 +1069,11 @@ If L>0:Then
 Abs (D)→E:Abs (C)→F
 If E>F:Then E→G:F→E:G→F:IfEnd
 E÷F→G
-G÷(1+√(1+G×G))→G
-G÷(1+√(1+G×G))→G
-G×G→H
-1÷15→E
-1÷13–H×E→E
-1÷11–H×E→E
-1÷9–H×E→E
-1÷7–H×E→E
-1÷5–H×E→E
-1÷3–H×E→E
-G×(1–H×E)×4→G
-If Abs (D)>Abs (C):Then 1.5707963267949–G→G:IfEnd
-If C<0:Then 3.14159265358979–G→G:IfEnd
+tan⁻¹ (G)×45÷tan⁻¹ (1)→G
+If Abs (D)>Abs (C):Then 90–G→G:IfEnd
+If C<0:Then 180–G→G:IfEnd
 If D<0:Then –G→G:IfEnd
-G×180÷3.14159265358979→M
+G→M
 IfEnd
 0→N
 If S>0:Then P÷S→N:IfEnd

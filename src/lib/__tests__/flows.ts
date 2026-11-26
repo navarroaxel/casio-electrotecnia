@@ -24,12 +24,25 @@ export const tens = (o: { seq?: number; ref?: number; value?: number; angle?: nu
 };
 // CARGA: the connection (1 star with neutral, 2 star without, 3 delta), symmetric?, how it is given (1 Z, 2 S, 3 P, 4 several,
 // 5 motor and phases) and the values typed
-export const carga = (conn: number, symmetric: boolean, how: number, values: number[]): Flow => step([2, conn, symmetric ? 1 : 2, how], values);
+// (the tests write the powers of the options 4 and 5 in kW; the program asks for them in W, so they are ×1000 here)
+const inW = (how: number, v: number[]): number[] => {
+  if (how === 4) return v.map((x, i) => (i >= 1 && i % 2 === 1 ? x * 1000 : x)); // N, then P cos P cos …
+  if (how !== 5) return v;
+  const out: number[] = [];
+  let i = 0;
+  for (let k = 0; k < 4 && i < v.length; k++) { // the motor, then R S T: P (and a cos φ only if P > 0)
+    out.push(v[i] * 1000);
+    if (v[i++] > 0) out.push(v[i++]);
+  }
+  return out;
+};
+export const carga = (conn: number, symmetric: boolean, how: number, values: number[]): Flow => step([2, conn, symmetric ? 1 : 2, how], inW(how, values));
 // a load by impedance: [modulus, angle] of each phase (or only one if symmetric)
 export const cargaZ = (conn: number, Z: [number, number][], symmetric = false): Flow => carga(conn, symmetric, 1, symmetric ? [...Z[0]] : Z.flat());
 // CARGA, 4 = VER: shows the stored load and goes back to the main menu
 export const verCarga = (): Flow => step([2, 4]);
-export const banco = (option: number, values: number[] = []): Flow => step([4, option], values); // 1 C known, 2 cos φ, 3 remove
+// (the tests still write the frequency first; the program does not ask it: it is 50 Hz)
+export const banco = (option: number, values: number[] = []): Flow => step([4, option], option < 3 ? values.slice(1) : values); // 1 C known, 2 cos φ, 3 remove
 // FASORIAL: the keys pressed on the graph screens (EXE goes on, + − zoom, the arrows move)
 export const fasor = (screens: number[]): Flow => step([5], [], screens);
 // VATIMETROS: option 1 one wattmeter, 2 Aron, 3 the two wattmeters on the load; `menus` are the keys of the submenu that follows

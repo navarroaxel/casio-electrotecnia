@@ -81,6 +81,9 @@ export function runBasic(lines: string[], inputs: number[], gfx: Gfx = newGfx(),
       .replace(/List (\d+)\[/g, "LL[$1][")
       .replace(/Getkey/g, "1") // a key is "pressed" at once: the wait loops do not hang
       .replace(/Abs \(/g, "Math.abs(")
+      .replace(/cos \(/g, "cosD(")
+      .replace(/sin \(/g, "sinD(")
+      .replace(/tan⁻¹ \(/g, "atanD(")
       .replace(/Intg \(/g, "Math.floor(")
       .replace(/√\(/g, "Math.sqrt(")
       .replace(/×/g, "*")
@@ -90,7 +93,11 @@ export function runBasic(lines: string[], inputs: number[], gfx: Gfx = newGfx(),
       .replace(/(?<![<>=!])=(?!=)/g, "===")
       .replace(/\[([A-Z])\]/g, (_, n) => `[v.${n}]`)
       .replace(/(?<![.\w])([A-Z])(?![\w(])/g, "v.$1");
-    return Function("v", "LL", `return (${js});`)(v, L) as number;
+    // the calculator in Deg mode (a program scales by tan⁻¹ 1 ÷ 45 so that it works in any mode)
+    const R = Math.PI / 180;
+    return Function("v", "LL", "cosD", "sinD", "atanD", `return (${js});`)(
+      v, L, (x: number) => Math.cos(x * R), (x: number) => Math.sin(x * R), (x: number) => Math.atan(x) / R,
+    ) as number;
   };
   const whileStack: number[] = [];
   const forStack: { start: number; name: string; end: number }[] = [];

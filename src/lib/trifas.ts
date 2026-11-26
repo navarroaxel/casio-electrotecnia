@@ -35,6 +35,7 @@ const POLAR = (n: number): string[] => [
 const showPolar = (row: string | number, k: string | number): string[] => [
   `Locate 5,${row},Intg (List 23[${k}]×100+0.5)÷100`,
   `Locate 13,${row},Intg (List 24[${k}]×100+0.5)÷100`,
+  `Locate 12,${row},"∠"`,
 ];
 
 // The capacitor bank in delta (equal C between R-S, S-T, T-R, across the source's line voltages). List 10[2] = 1 if it is
@@ -63,6 +64,7 @@ const phasorRow = (row: number, label: string, re: string, im: string): string[]
   `Locate 1,${row},"${label}"`,
   `Locate 4,${row},Intg (X×100+0.5)÷100`,
   `Locate 13,${row},Intg (Y×100+0.5)÷100`,
+  `Locate 12,${row},"∠"`,
 ];
 const valueRow = (row: number, label: string, v: string): string[] => [
   `Locate 1,${row},"${label}"`,
@@ -87,17 +89,13 @@ const BANK_LINES = [
   "If X=3:Then 0→List 10[2]:IfEnd",
   "If X=1:Then",
   "ClrText",
-  '"F HZ 0=50"?→F',
-  "If F=0:Then 50→F:IfEnd",
   '"C µF"?→C',
   "1→List 10[2]",
-  `2×${PI}×F→List 10[4]`,
+  `${2*3.14159265358979*50}→List 10[4]`,
   "C÷1000000→List 10[3]",
   "IfEnd",
   "If X=2:Then",
   "ClrText",
-  '"F HZ 0=50"?→F',
-  "If F=0:Then 50→F:IfEnd",
   '"COS FI OBJETIVO"?→C',
   "If C>1:Then 1→C:IfEnd",
   "If C<0.001:Then 0.001→C:IfEnd",
@@ -106,7 +104,7 @@ const BANK_LINES = [
   "List 9[2]–List 9[1]×E→G",
   "If G<0:Then 0→G:IfEnd",
   "1→List 10[2]",
-  `2×${PI}×F→List 10[4]`,
+  `${2*3.14159265358979*50}→List 10[4]`,
   "0→List 10[3]",
   "If D>0:Then G÷(3×List 10[4]×D)→List 10[3]:IfEnd",
   "IfEnd",
@@ -225,9 +223,6 @@ export const FASORIAL_LINES = [
   "(P–L)÷2→W:(J–I)÷4→D:If D>W:Then D→W:IfEnd",
   "If W=0:Then M→W:IfEnd",
   "1.2×W→W",
-  // redrawn after each zoom / pan key until EXE or EXIT: + – zoom, the arrows move the view
-  "1→Q",
-  "While Q=1",
   "Cls",
   "ViewWindow V–2×W,V+2×W,1000000,S–W,S+W,1000000",
   "For 1→K To N",
@@ -242,8 +237,7 @@ export const FASORIAL_LINES = [
   "X+2.2×C→G:Y+2.2×D→H",
   // the bank's current is labelled halfway along its arrow, not at the tip it shares with I_L
   "If Z=3:Then If K>3:Then If K<7:Then (A+X)÷2→G:(B+Y)÷2→H:IfEnd:IfEnd:IfEnd",
-  "If Abs (G–V)<2.1×W:Then If Abs (H–S)<1.1×W:Then",
-  ...pixelOf("G", "H"),
+    ...pixelOf("G", "H"),
   ...([1, 2, 3] as const).flatMap((z) => {
     const names = LABELS[z];
     return [
@@ -260,7 +254,6 @@ export const FASORIAL_LINES = [
       "IfEnd",
     ];
   }),
-  "IfEnd:IfEnd",
   "IfEnd",
   "Next",
   "PlotOn 0,0",
@@ -281,21 +274,7 @@ export const FASORIAL_LINES = [
   "Text 57,30,Intg (M×10+0.5)÷10",
   'Text 57,100,"EXE"',
   "While Getkey>0:WhileEnd",
-  "0→F",
-  "While F=0",
-  "Getkey→F",
-  "WhileEnd",
-  "If F=42:Then W÷1.5→W:IfEnd",
-  "If F=79:Then W÷1.5→W:IfEnd",
-  "If F=32:Then W×1.5→W:IfEnd",
-  "If F=69:Then W×1.5→W:IfEnd",
-  "If F=28:Then S+0.5×W→S:IfEnd",
-  "If F=37:Then S–0.5×W→S:IfEnd",
-  "If F=38:Then V–W→V:IfEnd",
-  "If F=27:Then V+W→V:IfEnd",
-  "If F=31:Then 0→Q:IfEnd",
-  "If F=47:Then 0→Q:IfEnd",
-  "WhileEnd",
+  "While Getkey=0:WhileEnd",
   "Next",
   "IfEnd",
 ];
@@ -304,7 +283,7 @@ export const FASORIAL_LINES = [
 // the three load elements (phases R S T, or RS ST TR in delta); 5 / 6 = line currents; 7 / 8 = voltage on each element;
 // List 9 = {P, Q, S, Re / Im of I_N (4 wires) or of the displacement U_N'N (3 wires), …, element currents at 10-15};
 // List 10 = {connection 1 = star 4 wires, 2 = star 3 wires, 3 = delta}. They persist: 0 = new, 1 = go on.
-// CARGA, option 4: up to 3 balanced loads in parallel (a motor and lamps, …), each by its P in kW and cos φ (a negative cos φ is a
+// CARGA, option 4: up to 3 balanced loads in parallel (a motor and lamps, …), each by its P in W and cos φ (a negative cos φ is a
 // capacitive load). P and Q add up (Q = P·tan φ) and the total is the symmetric load of the three phases: with S = P + jQ per phase
 // (a third of the total) and U the voltage on the element, Z = U²/S* = U²·(P + jQ)/(P² + Q²), with no angle needed.
 // A screen shows the total P, Q, S and the power factor.
@@ -319,10 +298,11 @@ const MULTI_LOADS = [
   "For 1→K To N",
   "ClrText",
   'Locate 1,1,"CARGA"',
-  "Locate 7,1,K",
-  '"P KW"?→A',
+  "Locate 8,1,K",
+  'Locate 1,2,"TRIFASICA: P TOTAL"',
+  'Locate 1,3,"DE LAS 3 FASES"',
+  '"P 3F W"?→A',
   '"COS FI NEG=CAPACIT"?→B',
-  "A×1000→A",
   "Abs (B)→C",
   "If C>1:Then 1→C:IfEnd",
   "If C<0.001:Then 0.001→C:IfEnd",
@@ -348,7 +328,7 @@ const MULTI_LOADS = [
 ];
 
 // CARGA, option 5: a balanced three-phase motor (P in kW and cos φ, a third on each phase) plus a single-phase load on each
-// element (phase R S T, or RS ST TR in delta), each by its P in kW and cos φ (0 kW = none; a negative cos φ is capacitive).
+// element (phase R S T, or RS ST TR in delta), each by its P in W and cos φ (0 kW = none; a negative cos φ is capacitive).
 // Per element P = P_motor/3 + P_load and Q = P_motor/3·tan φ_m + P_load·tan φ; then Z = U²·(P + jQ)/(P² + Q²) with U the voltage
 // on the element. The load is not symmetric.
 const MOTOR_AND_PHASES = [
@@ -358,8 +338,8 @@ const MOTOR_AND_PHASES = [
   'Locate 1,1,"MOTOR TRIFASICO"',
   'Locate 1,2,"SE REPARTE POR IGUAL"',
   'Locate 1,3,"EN LAS 3 FASES"',
-  '"P MOTOR 3F KW 0=NO"?→A',
-  "A×1000÷3→P:0→Q",
+  '"P MOTOR 3F W 0=NO"?→A',
+  "A÷3→P:0→Q",
   "If A>0:Then",
   '"COS FI NEG=CAPACIT"?→B',
   "Abs (B)→C",
@@ -384,8 +364,8 @@ const MOTOR_AND_PHASES = [
   'Locate 1,2,"SOLO ESA FASE, SIN"',
   'Locate 1,3,"CONTAR EL MOTOR"',
   ...["R", "S", "T"].flatMap((n, i) => [
-    `If T<3:Then If K=${i + 1}:Then "P FASE ${n} KW 0=NO"?→A:IfEnd:IfEnd`,
-    `If T=3:Then If K=${i + 1}:Then "P ${["R Y S", "S Y T", "T Y R"][i]} KW 0=NO"?→A:IfEnd:IfEnd`,
+    `If T<3:Then If K=${i + 1}:Then "P FASE ${n} W 0=NO"?→A:IfEnd:IfEnd`,
+    `If T=3:Then If K=${i + 1}:Then "P ${["R Y S", "S Y T", "T Y R"][i]} W 0=NO"?→A:IfEnd:IfEnd`,
   ]),
   "P→G:Q→H",
   "If A>0:Then",
@@ -393,7 +373,6 @@ const MOTOR_AND_PHASES = [
     `If T<3:Then If K=${i + 1}:Then "COS FI ${n} NEG=CAPACIT"?→B:IfEnd:IfEnd`,
     `If T=3:Then If K=${i + 1}:Then "COSFI ${["RS", "ST", "TR"][i]} NEG=CAPACIT"?→B:IfEnd:IfEnd`,
   ]),
-  "A×1000→A",
   "Abs (B)→C",
   "If C>1:Then 1→C:IfEnd",
   "If C<0.001:Then 0.001→C:IfEnd",

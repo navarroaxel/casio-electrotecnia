@@ -93,62 +93,18 @@ H→List 1[K]
 If Abs (A)>0:Then
 "FASE U GRADOS"?→B
 IfEnd
-B×3.14159265358979÷180→E
-E–6.28318530717959×Intg (E÷6.28318530717959+0.5)→E
-E×E→F
-1–F÷462→C
-1–F÷380×C→C
-1–F÷306×C→C
-1–F÷240×C→C
-1–F÷182×C→C
-1–F÷132×C→C
-1–F÷90×C→C
-1–F÷56×C→C
-1–F÷30×C→C
-1–F÷12×C→C
-1–F÷2×C→C
-1–F÷420→D
-1–F÷342×D→D
-1–F÷272×D→D
-1–F÷210×D→D
-1–F÷156×D→D
-1–F÷110×D→D
-1–F÷72×D→D
-1–F÷42×D→D
-1–F÷20×D→D
-1–F÷6×D→D
-E×D→D
+B×tan⁻¹ (1)÷45→E
+cos (E)→C
+sin (E)→D
 A×G×C→List 2[K]:A×G×D→List 3[K]
 "I A (0 SI NO HAY)"?→A
 0→B
 If Abs (A)>0:Then
 "FASE I GRADOS"?→B
 IfEnd
-B×3.14159265358979÷180→E
-E–6.28318530717959×Intg (E÷6.28318530717959+0.5)→E
-E×E→F
-1–F÷462→C
-1–F÷380×C→C
-1–F÷306×C→C
-1–F÷240×C→C
-1–F÷182×C→C
-1–F÷132×C→C
-1–F÷90×C→C
-1–F÷56×C→C
-1–F÷30×C→C
-1–F÷12×C→C
-1–F÷2×C→C
-1–F÷420→D
-1–F÷342×D→D
-1–F÷272×D→D
-1–F÷210×D→D
-1–F÷156×D→D
-1–F÷110×D→D
-1–F÷72×D→D
-1–F÷42×D→D
-1–F÷20×D→D
-1–F÷6×D→D
-E×D→D
+B×tan⁻¹ (1)÷45→E
+cos (E)→C
+sin (E)→D
 A×G×C→List 4[K]:A×G×D→List 5[K]
 Next
 IfEnd

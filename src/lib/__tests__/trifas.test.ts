@@ -160,7 +160,7 @@ describe("TRIFAS listing run by the interpreter", () => {
 
 describe("FASORIAL: the phasor diagram drawn by the listing", () => {
   const K = { TENS: 72, CARGA: 62, SOLVE: 52, FASOR: 63, EXIT: 71, EXE: 31, PLUS: 42, MINUS: 32, UP: 28, DOWN: 37, LEFT: 38, RIGHT: 27 };
-  const draw = (conn: 1 | 2 | 3, input: ThreePhaseInput, keys: number[] = [K.EXE, K.EXE]) => {
+  const draw = (conn: 1 | 2 | 3, input: ThreePhaseInput, keys: number[] = []) => {
     const gfx = go(TRIFAS_LINES, flow(nuevo(), fromInput(conn, input), solve(), fasor(keys), exit()));
     return gfx.pages.slice(1); // page 0 is what came before the first Cls (one page per drawing: a zoom or a pan draws again)
   };
@@ -228,29 +228,6 @@ describe("FASORIAL: the phasor diagram drawn by the listing", () => {
           draw(conn, inp).forEach(inside);
         }
   });
-  test("zoom: + shows half-again closer (the half-height ÷ 1,5), − farther, and the same centre", () => {
-    const pages = draw(1, EX1, [K.PLUS, K.EXE, K.EXE]); // screen 1 drawn, + → drawn again, EXE; screen 2, EXE
-    expect(pages).toHaveLength(3);
-    const h = (q: (typeof pages)[number]) => (q.window![4] - q.window![3]) / 2;
-    const cx = (q: (typeof pages)[number]) => (q.window![0] + q.window![1]) / 2;
-    near(h(pages[1]), h(pages[0]) / 1.5, 1e-9);
-    near(cx(pages[1]), cx(pages[0]), 1e-9);
-    const out = draw(1, EX1, [K.MINUS, K.EXE, K.EXE]);
-    near((out[1].window![4] - out[1].window![3]) / 2, (out[0].window![4] - out[0].window![3]) / 2 * 1.5, 1e-9);
-  });
-  test("pan: the arrow keys move the window (up / down by half its half-height, left / right by its half-height)", () => {
-    const pages = draw(1, EX1, [K.UP, K.LEFT, K.DOWN, K.RIGHT, K.EXE, K.EXE]);
-    expect(pages).toHaveLength(6); // the first drawing, four pans, screen 2
-    const w0 = pages[0].window!, h = (w0[4] - w0[3]) / 2;
-    near(pages[1].window![3] - w0[3], 0.5 * h, 1e-9); // up
-    near(pages[2].window![0] - w0[0], -h, 1e-9); // left, from the already panned view
-    near(pages[3].window![3] - w0[3], 0, 1e-9); // down again
-    near(pages[4].window![0] - w0[0], 0, 1e-9); // right again
-  });
-  test("the zoomed view still draws every phasor, with the labels on the screen", () => {
-    const pages = draw(1, EX1, [K.PLUS, K.PLUS, K.PLUS, K.EXE, K.EXE]);
-    for (const q of pages) for (const [r, c] of q.texts) { expect(r).toBeGreaterThanOrEqual(1); expect(r).toBeLessThanOrEqual(57); expect(c).toBeGreaterThanOrEqual(1); expect(c).toBeLessThanOrEqual(121); }
-  });
   test("the arrowheads are 25° off the shaft and a tenth of the window long", () => {
     const [v] = draw(1, EX1);
     const W = (v.window![4] - v.window![3]) / 2;
@@ -313,7 +290,7 @@ describe("BANCO C and VATIMETROS (two wattmeters on the real load) from the list
     const g = run(flow(src(1, FIG), banco(1, [50, 100]), exit())); // BANCO 1 = C CONOCIDO
     const w = 2 * Math.PI * 50, c = 100e-6, Ur = 220;
     close(row(g, "IRC")![1], 3 * w * c * Ur, 0.01);
-    close(row(g, "IRC")![2], 180, 0.01);
+    close(Math.abs(row(g, "IRC")![2] as number), 180, 0.01);
     const m = solveThreePhase(FIG);
     const ilr: [number, number] = [m.I[0][0] - 3 * w * c * Ur, m.I[0][1]]; // I_RC = j·3ωC·(j220) = −3ωC·220, real and negative
     close(row(g, "ILR")![1], mag(ilr), 0.01);
@@ -323,7 +300,7 @@ describe("BANCO C and VATIMETROS (two wattmeters on the real load) from the list
     close(row(g, "FP")![1], m.P / Math.hypot(m.P, Qn), 0.0051); // shown with 2 decimals
   });
   test("with a bank, FASORIAL draws a third screen: I_L from O and the bank's current from the tip of I to the tip of I_L", () => {
-    const g = run(flow(src(1, FIG), banco(1, [50, 100]), fasor([KEYS.EXE, KEYS.EXE, KEYS.EXE]), exit())); // EXE on each of the 3 screens
+    const g = run(flow(src(1, FIG), banco(1, [50, 100]), fasor([]), exit())); // EXE on each of the 3 screens
     const pages = g.pages.slice(1);
     expect(pages).toHaveLength(3);
     const w = 2 * Math.PI * 50, c = 100e-6;
@@ -350,7 +327,7 @@ describe("BANCO C and VATIMETROS (two wattmeters on the real load) from the list
     expect(g.screens.some((sc) => sc.some((x) => x[2] === "PRIMERO RESOLVER"))).toBe(true);
   });
   test("QUITAR BANCO takes the third screen away", () => {
-    const g = run(flow(src(1, FIG), banco(1, [50, 100]), banco(3), fasor([KEYS.EXE, KEYS.EXE]), exit())); // then BANCO 3 = QUITAR: 2 screens
+    const g = run(flow(src(1, FIG), banco(1, [50, 100]), banco(3), fasor([]), exit())); // then BANCO 3 = QUITAR: 2 screens
     expect(g.pages.slice(1)).toHaveLength(2);
   });
 });
@@ -381,10 +358,6 @@ describe("defaults: 0 = U_RN 220 V at 90°, a value of 0 = 220 V (phase) / 380 V
   });
   test("a typed value still wins", () => {
     expect(ir(flow(tens({ ref: 1, value: 127, angle: 0 }), cargaZ(1, Z3)))[1]).toBeCloseTo(12.7, 2);
-  });
-  test("BANCO C: 0 Hz is 50 Hz", () => {
-    const get = (f: number) => rowOf(go(TRIFAS_LINES, flow(nuevo(), tens(), cargaZ(1, Z3), solve(), banco(1, [f, 100]), exit())), "ILR")!;
-    expect(get(0)).toEqual(get(50));
   });
 });
 

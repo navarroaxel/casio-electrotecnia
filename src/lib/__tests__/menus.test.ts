@@ -19,7 +19,7 @@ const MAIN_BANCO = 73; // the number key of item 4 of the main menu
 describe("submenus: arrows + EXE, the number key, EXIT", () => {
   test("▼ then EXE on the BANCO C menu chooses its second item (COS FI OBJETIVO), as the key 2 does", () => {
     const byKey = go(TRIFAS_LINES, flow(base(), banco(2, [50, 1]), exit()));
-    const byArrows = go(TRIFAS_LINES, flow(base(), press(MAIN_BANCO, KEY.DOWN, KEY.EXE), typed(50, 1), exit()));
+    const byArrows = go(TRIFAS_LINES, flow(base(), press(MAIN_BANCO, KEY.DOWN, KEY.EXE), typed(1), exit()));
     expect(rowOf(byArrows, "C µF")).toEqual(rowOf(byKey, "C µF"));
     expect(rowOf(byArrows, "C µF")).toBeDefined();
   });
