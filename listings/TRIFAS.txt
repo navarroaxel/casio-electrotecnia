@@ -518,7 +518,7 @@ If O=7:Then
 ClrText
 Locate 1,1,"BORRAR TODO?"
 Locate 3,2,"NO¹"
-Locate 3,3,"SI, BORRAR²"
+Locate 3,3,"SI²"
 While Y=1
 Locate 1,2," ":Locate 1,3," "
 Locate 1,S+1,">"

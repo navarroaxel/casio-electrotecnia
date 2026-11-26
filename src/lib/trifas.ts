@@ -561,7 +561,7 @@ export const TRIFAS_LINES = [
   "IfEnd",
   // 7: clear everything (asks first)
   "If O=7:Then",
-  ...pickMenu({ title: "BORRAR TODO?", items: ["NO", "SI, BORRAR"], choice: "X" }),
+  ...pickMenu({ title: "BORRAR TODO?", items: ["NO", "SI"], choice: "X" }),
   "If X=2:Then",
   ...INIT,
   "IfEnd",

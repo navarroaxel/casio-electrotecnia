@@ -118,7 +118,7 @@ export const POLIARM_LINES = [
     flag: "T",
     sel: "S",
     key: "M",
-    draw: ['Locate 1,1,"BORRAR TODO?"', 'Locate 3,2,"NO"', 'Locate 3,3,"SI, BORRAR"'],
+    draw: ['Locate 1,1,"BORRAR TODO?"', 'Locate 3,2,"NO"', 'Locate 3,3,"SI"'],
   }),
   "If X=2:Then",
   ...INIT,
