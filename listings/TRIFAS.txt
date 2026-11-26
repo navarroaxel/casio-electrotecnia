@@ -323,9 +323,9 @@ If N>3:Then 3→N:IfEnd
 0→P:0→Q
 For 1→K To N
 ClrText
-Locate 1,1,"CARGA"
-Locate 8,1,K
-"P 3F W"?→A
+If K=1:Then "CARGA 1 P 3F W"?→A:IfEnd
+If K=2:Then "CARGA 2 P 3F W"?→A:IfEnd
+If K=3:Then "CARGA 3 P 3F W"?→A:IfEnd
 "COS FI NEG=CAPACIT"?→B
 Abs (B)→C
 If C>1:Then 1→C:IfEnd
