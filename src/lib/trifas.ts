@@ -74,6 +74,14 @@ const valueRow = (row: number, label: string, v: string): string[] => [
 // Q_C = Q − P·tan φ', C = Q_C / (3·ω·U_L²). It shows the line currents ahead of the bank I_LR I_LS I_LT, C, and the Q, S and
 // power factor with the bank (P does not change); page 2 the bank's line currents I_RC I_SC I_TC.
 const BANK_LINES = [
+  // without a solution (RESOLVER not run yet) P and Q are 0 and everything would come out 0
+  "If O=4:Then If List 9[3]=0:Then",
+  "ClrText",
+  'Locate 1,3,"PRIMERO RESOLVER"',
+  'Locate 1,4,"(OPCION 3)"',
+  ...PAUSE,
+  "0→O",
+  "IfEnd:IfEnd",
   "If O=4:Then",
   ...pickMenu({ title: "BANCO C EN TRIANGULO", items: ["C CONOCIDO", "COS FI OBJETIVO", "QUITAR BANCO"], choice: "X" }),
   "If X=3:Then 0→List 10[2]:IfEnd",

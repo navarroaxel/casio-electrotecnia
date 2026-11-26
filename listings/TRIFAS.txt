@@ -731,6 +731,15 @@ Locate 19,7,"EXE"
 While Getkey>0:WhileEnd
 While Getkey=0:WhileEnd
 IfEnd
+If O=4:Then If List 9[3]=0:Then
+ClrText
+Locate 1,3,"PRIMERO RESOLVER"
+Locate 1,4,"(OPCION 3)"
+Locate 19,7,"EXE"
+While Getkey>0:WhileEnd
+While Getkey=0:WhileEnd
+0→O
+IfEnd:IfEnd
 If O=4:Then
 1→S:1→Y
 ClrText
